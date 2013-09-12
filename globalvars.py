@@ -5,13 +5,10 @@ import sys
 # Exceptions
  LocationUnavailable:
 
-time = 0
-
 # MAP DATA
 map_size = 100
 # map_contents is a dict with locations as keys and 'farm' or 'forest' as values
 map_contents = {
-                unit_location(): 'farm'
                }
 
 # FARM DATA
@@ -44,9 +41,15 @@ REQUIRED_RESOURCES = {
 
 # FOREST DATA
 FOREST_UNIT_SIZE = 1
+RESOURCE_TYPES = ['water', 'wood']
 DEFAULT_FOREST_RESOURCES = {
 	"water": 20,
 	"wood": 100
 }
 
+# General parameters and variables
+time = 0
+_farm_units = None
+_forest_units = None
+user_input = None
 
