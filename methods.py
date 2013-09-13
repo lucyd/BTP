@@ -33,8 +33,11 @@ def check_unit(loc):
 
 def assign_random_resources():
   resources = {}
-  for i in range(len(RESOURCE_TYPES)):
-    resources[RESOURCE_TYPES[i]] = random.randrange(0,RESOURCE_LIMITS[i])
+  for i in range(len(FOREST_RESOURCE_TYPES)):
+    x = random.randrange(0,FOREST_RESOURCE_LIMITS[i])
+    while x > RESOURCES[RESOURCE_TYPES[i]]:
+      x = random.randrange(0,FOREST_RESOURCE_LIMITS[i])
+    resources[RESOURCE_TYPES[i]] = x
   return resources
 
 def increment_time():
@@ -44,12 +47,12 @@ def increment_time():
 def farm_growth(loc):
   ''' Simulates the farm growth '''
   for _farm_unit in _farm_units:
-    _farm_unit.age += 1
+    _farm_unit.age += (FARM_GROWTH_RATE[_farm_unit.farm_type])
 
 def forest_growth():
   ''' Simulates the forest growth '''
   for _forest_unit in _forest_units:
-    _forest_unit.age += 1
+    _forest_unit.age += FOREST_GROWTH_RATE
 
 def create_farm():
   ''' Creates a custom farm unit '''

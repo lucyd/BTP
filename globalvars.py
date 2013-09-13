@@ -15,25 +15,19 @@ map_contents = {
 FARM_UNIT_SIZE = 1
 VALID_FARM_TYPES = ['COTTON', 'TOBACCO', 'CHILLI']
 DEFAULT_FARM_TYPE = 'COTTON'
-GROWTH_RATE = {
+FARM_GROWTH_RATE = {
 	        'COTTON' : 10,
 		'TOBACCO' : 3,
 		'CHILLI' : 5
 	      }
 
-DECAY_RATE = {
+FARM_DECAY_RATE = {
 	'COTTON' : 10,
 	'TOBACCO' : 3,
 	'CHILLI' : 5
 }
 
-REPRODUCTION_RATE = {
-	'COTTON' : 10,
-	'TOBACCO' : 3,
-	'CHILLI' : 5
-}
-
-REQUIRED_RESOURCES = {
+FARM_REQUIRED_RESOURCES = {
 	'COTTON' : {'water': 10,'temperature': 10,'minerals':3},
 	'TOBACCO' : {'water':3 ,'temperature':4 ,'minerals':3},
 	'CHILLI' : {'water':5 ,'temperature':4 ,'minerals':4}
@@ -42,8 +36,8 @@ REQUIRED_RESOURCES = {
 # FOREST DATA
 FOREST_UNIT_SIZE = 1
 FOREST_GROWTH_RATE = 0.5
-RESOURCE_TYPES = ['water', 'wood']
-RESOURCE_LIMITS = [100, 100]
+FOREST_RESOURCE_TYPES = ['water', 'wood']
+FOREST_RESOURCE_LIMITS = [100, 100]
 DEFAULT_FOREST_RESOURCES = {
 	"water": 20,
 	"wood": 100
