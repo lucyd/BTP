@@ -1,7 +1,7 @@
 class unit_location:
   ''' A location of an unit'''
-  def __init__(self):
-    self.center = (None, None)
+  def __init__(self, x=None, y=None):
+    self.center = (x, y)
 
   def set_center(x, y):
     self.center = (x, y)
@@ -31,12 +31,12 @@ class forest_unit:
     self.location = assign_random_location("forest")
     #self.resources = DEFAULT_FOREST_RESOURCES
     self.resources = assign_random_resources()
+    self.age = 0
 
   def change_location(loc):
     self.location = loc
 
   def fill_resources(resources_dict):
     self.resources = resources_dict
-
 
 

@@ -6,8 +6,7 @@
 True ==> increment_time()
 farm_units == None ==> get_farm_input()
 forest_units == None ==> get_forest_input()
-True ==> increment_farm_age()
-True ==> get_user_input()
-True ==> process_user_input()
-
+True ==> farm_growth()
+True ==> forest_growth()
+True ==> process_user_input(get_user_input())
 

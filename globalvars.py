@@ -41,7 +41,9 @@ REQUIRED_RESOURCES = {
 
 # FOREST DATA
 FOREST_UNIT_SIZE = 1
+FOREST_GROWTH_RATE = 0.5
 RESOURCE_TYPES = ['water', 'wood']
+RESOURCE_LIMITS = [100, 100]
 DEFAULT_FOREST_RESOURCES = {
 	"water": 20,
 	"wood": 100
@@ -49,7 +51,11 @@ DEFAULT_FOREST_RESOURCES = {
 
 # General parameters and variables
 time = 0
+RESOURCES = {}
 _farm_units = None
 _forest_units = None
 user_input = None
+user_actions = ['Create Farm', 'Destroy Farm', \
+	       'Harvest Farm', 'Destroy Forest', \
+	       'Harvest Forest']
 

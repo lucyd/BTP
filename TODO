@@ -1,0 +1,5 @@
+
+1. Use the FARM, FOREST _GROWTH_RATE,_DECAY_RATE,_REPRODUCTION_RATE  dicts in farm_growth() and forest_growth()
+2. Write the remaining user_action methods
+3. Bring in RESOURCES to game context
+
