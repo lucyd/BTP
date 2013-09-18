@@ -1,3 +1,125 @@
+# Game: farm-forest
+
+# Global Variables
+# imports
+import random
+import sys
+
+# Exceptions
+# LocationUnavailable:
+
+# MAP DATA
+map_size = 100
+# map_contents is a dict with locations as keys and 'farm' or 'forest' as values
+map_contents = {
+               }
+
+# FARM DATA
+FARM_UNIT_SIZE = 1
+VALID_FARM_TYPES = ['COTTON', 'TOBACCO', 'CHILLI']
+DEFAULT_FARM_TYPE = 'COTTON'
+FARM_GROWTH_RATE = {
+	        'COTTON' : 10,
+		'TOBACCO' : 3,
+		'CHILLI' : 5
+	      }
+
+FARM_REQUIREMENTS = {
+	'COTTON' : {'water': 10,'temperature': 10,'minerals':3},
+	'TOBACCO' : {'water':3 ,'temperature':4 ,'minerals':3},
+	'CHILLI' : {'water':5 ,'temperature':4 ,'minerals':4}
+}
+
+FARM_RESOURCES = {
+       'COTTON' : {'wood':2, 'cotton':10},
+       'TOBACCO' : {'wood':3, 'tobacco':10},
+       'CHILLI' : {'wood':1, 'chilli':10}
+}
+
+# FOREST DATA
+FOREST_UNIT_SIZE = 1
+FOREST_GROWTH_RATE = 0.5
+FOREST_RESOURCE_TYPES = ['water', 'wood']
+FOREST_RESOURCE_LIMITS = [100, 100]
+DEFAULT_FOREST_RESOURCES = {
+	"water": 20,
+	"wood": 100
+}
+
+# General parameters and variables
+initial_forest_input = None
+# Current time of the game
+time = 0
+# Dictionary of player's acquired resources
+# Union of FARM_RESOURCES and FOREST_RESOURCE_TYPES
+PLAYER_RESOURCES = {'water':0, 'wood':0, \
+                    'cotton':0, 'tobacco':0, \
+                    'chilli':0}
+# _farm_units is a list of farm_unit objects
+_farm_units = []
+# _forest_units is a list of forest_unit objects
+_forest_units = []
+# List of possible actions the player can take
+user_actions = ['Pass', 'Create Farm', 'Destroy Farm', \
+	       'Harvest Farm', 'Destroy Forest', \
+	       'Harvest Forest', 'List Farms', \
+               'List Forests', 'List Resources']
+# Index of the action selected by the player
+user_input = None
+
+
+
+# Object Definitions
+class unit_location:
+  ''' A location of an unit'''
+  def __init__(self, x=None, y=None):
+    self.center = (x, y)
+
+  def set_center(self, x, y):
+    self.center = (x, y)
+
+  def get_center(self):
+    return self.center
+
+class farm_unit:
+  ''' The farm unit class '''
+  def __init__(self, _type=None):
+    if _type == None or _type.strip() == '' \
+	      or _type not in VALID_FARM_TYPES:
+      self.farm_type = DEFAULT_FARM_TYPE
+    else:
+      self.farm_type = _type
+    self.location = assign_random_location("farm")
+    self.age = 0
+    
+  def change_location(self, loc):
+    self.location = loc
+
+  def change_type(self, _type):
+    # _type is a valid farm unit type
+    self.farm_type = _type
+
+  def get_type(self):
+    return self.farm_type
+
+class forest_unit:
+  ''' The forest unit class '''
+  def __init__(self):
+    self.location = assign_random_location("forest")
+    #self.resources = DEFAULT_FOREST_RESOURCES
+    self.resources = assign_random_resources()
+    self.age = 0
+
+  def change_location(loc):
+    self.location = loc
+
+  def fill_resources(resources_dict):
+    self.resources = resources_dict
+
+
+
+
+# Methods
 def assign_location(unit, loc):
   ''' If loc available in the map, allocates the loc location
 	to unit. Else, raises LocationUnavailable exception'''
@@ -214,3 +336,17 @@ def process_user_input(user_input):
   elif user_action == 'List Resources':
     list_resources()
 
+
+
+# Infinite game loop
+while True:
+  if True :
+     increment_time()
+  if initial_forest_input == None :
+     get_initial_forest_input()
+  if True :
+     simulate_farm_growth()
+  if True :
+     simulate_forest_growth()
+  if True :
+     process_user_input(get_user_input())
