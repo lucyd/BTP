@@ -1,0 +1,5 @@
+True ==> increment_time()
+initial_forest_input == None ==> get_initial_forest_input()
+True ==> simulate_farm_growth()
+True ==> simulate_forest_growth()
+True ==> process_user_input(get_user_input())
