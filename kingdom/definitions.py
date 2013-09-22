@@ -43,7 +43,7 @@ class industry:
       self.industry_type = _type
     self.location = assign_random_location("industry")
     self.age = 0
-    self.product = 0
+    self.gross_product = 0
 
   def get_location(self):
     return self.location

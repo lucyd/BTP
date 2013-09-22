@@ -8,7 +8,7 @@ def assign_random_location(unit):
   if unit == 'farm':
     size = FARM_UNIT_SIZE
   elif unit == 'industry':
-    size = FOREST_UNIT_SIZE
+    size = INDUSTRY_UNIT_SIZE
   loc = unit_location()
   while True:
     x = random.randrange(0+size, map_size-size)
@@ -55,12 +55,13 @@ def simulate_industry_production():
   global PRODUCTION_RATE
   for industry  in industries:
     industry.age += 1
-    industry.product += PRODUCTION_RATE[industry.industry_type]
+    industry.gross_product += PRODUCTION_RATE[industry.industry_type]
 
 def create_farms():
   ''' Creates custom farm units '''
   global VALID_FARM_TYPES
   global farms
+  global map_contents
   print 'Enter no.of farms to be built: ',
   farms_to_build = input()
   while farms_to_build > 0:
@@ -90,6 +91,7 @@ def create_farms():
 def destroy_farms():
   ''' Destroys specified farm units '''
   global farms
+  global map_contents
   print 'Enter no.of farms to destroy: ',
   farms_to_destroy = input()
   while farms_to_destroy > 0:
@@ -101,6 +103,7 @@ def destroy_farms():
       if farms[i].location.center == (x,y):
         map_contents.delete_location(x,y)
         farms = farms[:i] + farms[i+1:]
+	return
     print 'Farm-unit specified not found'
 
 def harvest_farm(farm_index):
@@ -115,6 +118,69 @@ def harvest_farm(farm_index):
     PLAYER_RESOURCES[resource] += (farms[farm_index].age * _farm_resources[resource])
   farms = farms[:farm_index] + farms[farm_index+1:]
 
+def create_industry():
+  ''' Creates custom industry units'''
+  global VALID_INDUSTRY_TYPES
+  global industries
+  global map_contents
+  print 'Enter no.of industries to be built: ',
+  industries_to_build = input()
+  while industries_to_build > 0:
+    industries_to_build -= 1
+    new_industry = industry()
+    print 'Select industry type'
+    print_list(VALID_INDUSTRY_TYPES)
+    industry_type = input()
+    new_industry.change_industry_type(VALID_INDUSTRY_TYPES[industry_type])
+    is_location_random = ''
+    while is_location_random not in ['Y', 'N']:
+      print 'Randomize location? (Y/N) : ',
+      is_location_random = raw_input()
+    if is_location_random == 'N':
+      print 'Enter industry-unit center co-ordinates: '
+      x = input()
+      y = input()
+      if check_map(x,y) is None:
+        new_loc = unit_location(x, y)
+        new_industry.change_location(new_loc)
+        map_contents[new_loc] = 'industry'
+      else:
+        print 'Oops!!! Location already assigned'
+        return
+    industries.append(new_industry)
+
+def destroy_industries():
+  ''' Destroys specified industry units '''
+  global industries
+  global map_contents
+  print 'Enter no.of industries to destroy: ',
+  industries_to_destroy = input()
+  while industries_to_destroy > 0:
+    industries_to_destroy -= 1
+    print 'Enter center coordinates of industry:'
+    x = input()
+    y = input()
+    for i in range(len(industries)):
+      if industries[i].location.center == (x,y):
+        map_contents.delete_location(x,y)
+        industries = industries[:i] + industries[i+1:]
+	return
+    print 'Industry-unit specified not found'
+
+def change_production_rate():
+  ''' Changes the production rates of industries based on user input '''
+  global PRODUCTION_RATE
+  global VALID_INDUSTRY_TYPES
+  print 'Current production rates are as follows: '
+  for _industry in PRODUCTION_RATE.keys():
+    print _industry, ': ', PRODUCTION_RATE[_industry]
+  print 'Select industry type'
+  print_list(VALID_INDUSTRY_TYPES)
+  industry_type = input()
+  print 'Enter new production-rate: ',
+  new_production_rate = input()
+  PRODUCTION_RATE[VALID_INDUSTRY_TYPES[industry_type]] = new_production_rate  
+
 def list_farms():
   ''' Lists all the farms '''
   global farms
@@ -125,6 +191,18 @@ def list_farms():
     print "Type:", farm.farm_type, \
           "  Center:", farm.location.center, \
           "  Age:", farm.age
+
+def list_industries():
+  ''' Lists all the industries '''
+  global industries
+  if industries == []:
+    print 'No industries in the map'
+    return
+  for industry in industries:
+    print "Type:", industry.industry_type, \
+          "  Center:", industry.location.center, \
+          "  Age:", industry.age, \
+          "  Gross product:", industry.gross_product
 
 def list_resources():
   ''' Lists the player's acquired resources '''
