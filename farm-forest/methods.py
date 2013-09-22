@@ -1,12 +1,3 @@
-def assign_location(unit, loc):
-  ''' If loc available in the map, allocates the loc location
-	to unit. Else, raises LocationUnavailable exception'''
-  global map_contents
-  if loc in map_contents.keys():
-    raise LocationUnavailable
-  else:
-    map_contents[loc] = unit
-
 def assign_random_location(unit):
   ''' Selects a random location from the map and assigns it as the unit '''
   global FARM_UNIT_SIZE
@@ -28,14 +19,20 @@ def assign_random_location(unit):
   map_contents[loc] = unit
   return loc
 
-def check_unit(loc):
-  ''' If loc is allocated in the map, returns the unit allocated to.
+def check_map(x, y):
+  ''' If (x,y) is allocated in the map, returns the unit allocated to.
       Else, returns None. '''
   global map_contents
-  if loc in map_contents.keys():
-    return map_contents[loc]
-  else:
-    return None
+  for loc in map_contents.keys():
+    if loc.center == (x,y):
+      return map_contents[loc]
+  return None
+
+def delete_location(x, y):
+  ''' Removes the location from map_contents '''
+  for loc in map_contents.keys():
+    if loc.center == (x,y):
+      map_contents.pop(loc, None)
 
 def assign_random_resources():
   ''' Returns a resources dictionary with random values  '''
@@ -84,7 +81,13 @@ def create_farm():
     print 'Enter farm-unit center co-ordinates: '
     x = input()
     y = input()
-    new_farm_unit.change_location(unit_location(x, y))
+    if check_map(x,y) is None:
+      new_loc = unit_location(x,y)
+      new_farm_unit.change_location(new_loc)
+      map_contents[loc] = 'farm'
+    else:
+      print 'Oops!!! Location already assigned'
+      return
   _farm_units.append(new_farm_unit)
 
 def destroy_farm():
@@ -95,7 +98,9 @@ def destroy_farm():
   y = input()
   for i in range(len(_farm_units)):
     if _farm_units[i].location.center == (x,y):
+      map_contents.delete_location(x,y)
       _farm_units = _farm_units[:i] + _farm_units[i+1:]
+      return
   print 'Farm-unit specified not found'
 
 def harvest_farm():
@@ -111,7 +116,9 @@ def harvest_farm():
       _farm_resources = FARM_RESOURCES[_farm_units[i].farm_type]
       for resource in _farm_resources.keys():
         PLAYER_RESOURCES[resource] += (_farm_units[i].age * _farm_resources[resource])
+      map_contents.delete_location(x,y)
       _farm_units = _farm_units[:i] + _farm_units[i+1:]
+      return
   print 'Farm-unit specified not found'
 
 def destroy_forest():
@@ -122,6 +129,7 @@ def destroy_forest():
   y = input()
   for i in range(len(_forest_units)):
     if _forest_units[i].location.center == (x,y):
+      map_contents.delete_location(x,y)
       _forest_units = _forest_units[:i] + _forest_units[i+1:]
       return
   print 'Forest-unit specified not found'
@@ -137,6 +145,7 @@ def harvest_forest():
     if _forest_units[i].location.center == (x,y):
       for resource in _forest_units[i].resources.keys():
         PLAYER_RESOURCES[resource] += (_forest_units[i].age * _forest_units[i].resources[resource])
+      map_contents.delete_location(x,y)
       _forest_units = _forest_units[:i] + _forest_units[i+1:]
       return
   print 'Forest-unit specified not found'

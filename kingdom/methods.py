@@ -19,14 +19,20 @@ def assign_random_location(unit):
   map_contents[loc] = unit
   return loc
 
-def check_unit(loc):
-  ''' If loc is allocated in the map, returns the unit allocated to.
+def check_map(x, y):
+  ''' If (x,y) is allocated in the map, returns the unit allocated to.
       Else, returns None. '''
   global map_contents
-  if loc in map_contents.keys():
-    return map_contents[loc]
-  else:
-    return None
+  for loc in map_contents.keys():
+    if loc.center == (x,y):
+      return map_contents[loc]
+  return None
+
+def delete_location(x, y):
+  ''' Removes the location from map_contents '''
+  for loc in map_contents.keys():
+    if loc.center == (x,y):
+      map_contents.pop(loc, None)
 
 def increment_time():
   ''' Increments game time by 1 '''
@@ -37,8 +43,11 @@ def simulate_farm_growth():
   ''' Simulates the farm growth '''
   global farms
   global FARM_GROWTH_RATE
+  global FARM_LIFE_SPAN
   for farm in farms:
     farm.age += (FARM_GROWTH_RATE[farm.farm_type])
+    if farm.age >= FARM_LIFE_SPAN[farm.farm_type]:
+      harvest_farm(farms.index(farm))
 
 def simulate_industry_production():
   ''' Simulates the industry production '''
@@ -48,102 +57,74 @@ def simulate_industry_production():
     industry.age += 1
     industry.product += PRODUCTION_RATE[industry.industry_type]
 
-def create_farm():
-  ''' Creates a custom farm unit '''
+def create_farms():
+  ''' Creates custom farm units '''
   global VALID_FARM_TYPES
-  global _farm_units
-  new_farm_unit = farm_unit()
-  print 'Select farm type'
-  for i in range(len(VALID_FARM_TYPES)):
-    print i, ': ', VALID_FARM_TYPES[i]
-  farm_type = input()
-  new_farm_unit.change_type(VALID_FARM_TYPES[farm_type]) 
-  is_location_random = ''
-  while is_location_random not in ['Y', 'N']:
-    print 'Randomize location? (Y/N) : ',
-    is_location_random = raw_input()
-  if is_location_random == 'N':
-    print 'Enter farm-unit center co-ordinates: '
+  global farms
+  print 'Enter no.of farms to be built: ',
+  farms_to_build = input()
+  while farms_to_build > 0:
+    farms_to_build -= 1
+    new_farm = farm()
+    print 'Select farm type'
+    print_list(VALID_FARM_TYPES)
+    farm_type = input()
+    new_farm.change_farm_type(VALID_FARM_TYPES[farm_type]) 
+    is_location_random = ''
+    while is_location_random not in ['Y', 'N']:
+      print 'Randomize location? (Y/N) : ',
+      is_location_random = raw_input()
+    if is_location_random == 'N':
+      print 'Enter farm-unit center co-ordinates: '
+      x = input()
+      y = input()
+      if check_map(x,y) is None:
+        new_loc = unit_location(x, y)
+        new_farm.change_location(new_loc)
+        map_contents[new_loc] = 'farm'
+      else:
+        print 'Oops!!! Location already assigned'
+        return
+    farms.append(new_farm)
+
+def destroy_farms():
+  ''' Destroys specified farm units '''
+  global farms
+  print 'Enter no.of farms to destroy: ',
+  farms_to_destroy = input()
+  while farms_to_destroy > 0:
+    farms_to_destroy -= 1
+    print 'Enter center coordinates of farm:'
     x = input()
     y = input()
-    new_farm_unit.change_location(unit_location(x, y))
-  _farm_units.append(new_farm_unit)
+    for i in range(len(farms)):
+      if farms[i].location.center == (x,y):
+        map_contents.delete_location(x,y)
+        farms = farms[:i] + farms[i+1:]
+    print 'Farm-unit specified not found'
 
-def destroy_farm():
-  ''' Destroys a specified farm unit '''
-  global _farm_units
-  print 'Enter farm-unit center coordinates:'
-  x = input()
-  y = input()
-  for i in range(len(_farm_units)):
-    if _farm_units[i].location.center == (x,y):
-      _farm_units = _farm_units[:i] + _farm_units[i+1:]
-  print 'Farm-unit specified not found'
-
-def harvest_farm():
+def harvest_farm(farm_index):
   ''' Remove and harvest a farm unit's resources '''
-  global _farm_units
+  global farms
   global FARM_RESOURCES
   global PLAYER_RESOURCES
-  print 'Enter farm-unit center coordinates:'
-  x = input()
-  y = input()
-  for i in range(len(_farm_units)):
-    if _farm_units[i].location.center == (x,y):
-      _farm_resources = FARM_RESOURCES[_farm_units[i].farm_type]
-      for resource in _farm_resources.keys():
-        PLAYER_RESOURCES[resource] += (_farm_units[i].age * _farm_resources[resource])
-      _farm_units = _farm_units[:i] + _farm_units[i+1:]
-  print 'Farm-unit specified not found'
-
-def destroy_forest():
-  ''' Destroys a specified forest unit '''
-  global _forest_units
-  print 'Enter forest-unit center coordinates:'
-  x = input()
-  y = input()
-  for i in range(len(_forest_units)):
-    if _forest_units[i].location.center == (x,y):
-      _forest_units = _forest_units[:i] + _forest_units[i+1:]
-      return
-  print 'Forest-unit specified not found'
-
-def harvest_forest():
-  ''' Kill and harvest a forest unit's resources '''
-  global _forest_units
-  global PLAYER_RESOURCES
-  print 'Enter forest-unit center coordinates:'
-  x = input()
-  y = input()
-  for i in range(len(_forest_units)):
-    if _forest_units[i].location.center == (x,y):
-      for resource in _forest_units[i].resources.keys():
-        PLAYER_RESOURCES[resource] += (_forest_units[i].age * _forest_units[i].resources[resource])
-      _forest_units = _forest_units[:i] + _forest_units[i+1:]
-      return
-  print 'Forest-unit specified not found'
+  if farm_index >= len(farms):
+    print 'Farm unit %d not found'%(farm_index)
+  _farm_resources = FARM_RESOURCES[farms[farm_index].farm_type]
+  for resource in _farm_resources.keys():
+    PLAYER_RESOURCES[resource] += (farms[farm_index].age * _farm_resources[resource])
+  farms = farms[:farm_index] + farms[farm_index+1:]
 
 def list_farms():
-  ''' Lists all the farm units '''
-  global _farm_units
-  if _farm_units == []:
-    print 'No farm units in the map'
+  ''' Lists all the farms '''
+  global farms
+  if farms == []:
+    print 'No farms in the map'
     return
-  for _farm_unit in _farm_units:
-    print "Type:", _farm_unit.farm_type, \
-          "  Center:", _farm_unit.location.center, \
-          "  Age:", _farm_unit.age
-
-def list_forests():
-  ''' Lists all the forest units '''
-  global _forest_units
-  if _forest_units == []:
-    print 'No forest units in the map'
-    return
-  for _forest_unit in _forest_units:
-    print "Center:", _forest_unit.location.center, \
-          "  Age:", _forest_unit.age, \
-          "  Resources:", _forest_unit.resources
+  for farm in farms:
+    print "Type:", farm.farm_type, \
+          "  Center:", farm.location.center, \
+          "  Age:", farm.age
 
 def list_resources():
   ''' Lists the player's acquired resources '''
@@ -151,46 +132,91 @@ def list_resources():
   for resource in PLAYER_RESOURCES.keys():
     print resource, ": ", PLAYER_RESOURCES[resource]
 
-def get_initial_forest_input():
-  ''' Initializes the forests in the map '''
-  global _forest_units
-  global initial_forest_input
-  _forest_units = []
-  print 'Enter initial no.of forests: '
-  total_forests = input()
-  for i in range(total_forests):
-    _forest_units.append(forest_unit())
-  initial_forest_input = total_forests
+def print_list(_list):
+  ''' Prints the contents of _list in an ordered format '''
+  for i in range(len(_list)):
+    print i, ": ", _list[i]
 
 def get_user_input():
   ''' Receives the user input '''
-  global user_actions
-  print 'Select one of the following actions'
-  for i in range(len(user_actions)):
-    print i, ": ", user_actions[i]
-  user_input = input()
-  return user_input
+  global domains
+  chosen_domain = len(domains.keys()) + 1
+  while chosen_domain >= len(domains.keys()):
+    print 'Select one of the following domains'
+    print_list(domains.keys())
+    chosen_domain = input()
+  domain_actions = domains.values()[chosen_domain]
+  user_action = len(domain_actions) + 1
+  while user_action >= len(domain_actions):
+    print 'Select one of the following actions'
+    print_list(domain_actions)
+    user_action = input()
+  return domain_actions[user_action]
 
-def process_user_input(user_input):
+def process_user_input(user_action):
   ''' Takes appropriate action based on user input '''
-  global user_actions
-  user_action = user_actions[user_input] 
   if user_action == 'Pass':
     return
-  elif user_action == 'Create Farm':
-    create_farm()
-  elif user_action == 'Destroy Farm':
-    destroy_farm()
-  elif user_action == 'Harvest Farm':
-    harvest_farm()
-  elif user_action == 'Destroy Forest':
-    destroy_forest()
-  elif user_action == 'Harvest Forest':
-    harvest_forest()
-  elif user_action == 'List Farms':
+  elif user_action == 'Create farms':
+    create_farms()
+  elif user_action == 'Destroy farms':
+    destroy_farms()
+  elif user_action == 'List farms':
     list_farms()
-  elif user_action == 'List Forests':
-    list_forests()
-  elif user_action == 'List Resources':
-    list_resources()
-
+  elif user_action == 'Create industries':
+    create_industries()
+  elif user_action == 'Destroy industries':
+    destroy_industries()
+  elif user_action == 'List industries':
+    list_industries()
+  elif user_action == 'Change production rate':
+    change_production_rate()
+  elif user_action == 'Create hospital/infirmary':
+    create_hospital()
+  elif user_action == 'Destroy hospital/infirmary':
+    destroy_hospital()
+  elif user_action == 'List hospitals/infirmaries':
+    list_hospitals()
+  elif user_action == 'Change treatment/medicine price':
+    modify_medicine_price()
+  elif user_action == 'Change tax':
+    change_tax()
+  elif user_action == 'Change wages':
+    change_wages()
+  elif user_action == 'Change budget allocation':
+    change_budget_allocation()
+  elif user_action == 'Create new trade route':
+    create_trade_route()
+  elif user_action == 'Destroy existing trade route':
+    destroy_trade_route()
+  elif user_action == 'Change export price':
+    change_export_price()
+  elif user_action == 'Change import policy':
+    change_import_policy()
+  elif user_action == 'Change export policy':
+    change_export_policy
+  elif user_action == 'Arrange festival':
+    arrange_festival()
+  elif user_action == 'Build cultural unit':
+    build_cultural_unit()
+  elif user_action == 'Build school':
+    build_school()
+  elif user_action == 'Build university':
+    build_university()
+  elif user_action == 'Destroy school':
+    destroy_school()
+  elif user_action == 'Destroy university':
+    destroy_university()
+  elif user_action == 'List schools':
+    list_schools()
+  elif user_action == 'List universities':
+    list_universities()
+  elif user_action == 'Build houses':
+    build_houses()
+  elif user_action == 'Destroy houses':
+    destroy_houses()
+  elif user_action == 'List houses':
+    list_houses()
+  elif user_action == 'Check population':
+    check_population()
+    

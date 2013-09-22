@@ -20,6 +20,13 @@ class farm:
     self.location = assign_random_location("farm")
     self.age = 0
   
+  def change_location(self, loc):
+    self.location = loc
+
+  def change_farm_type(self, _type):
+    # Assuming _type is in VALID_FARM_TYPES
+    self.farm_type = _type
+
   def get_location(self):
     return self.location
 
@@ -41,5 +48,13 @@ class industry:
   def get_location(self):
     return self.location
 
+  def change_location(self, loc):
+    self.location = loc
+	
   def get_industry_type(self):
     return self.industry_type
+
+  def change_industry_type(self, _type):
+    # Assuming _type is in VALID_INDUSTRY_TYPES
+    self.industry_type = _type
+

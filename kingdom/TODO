@@ -1,6 +1,6 @@
 
-1. Update with TODO of farm-forest
-2. Add new industries
+1. Update map_contents whenever they're being changed
+2. Before creating new units, check in map_contents
 3. Modify/Add user_action methods
-4. Update process_user_input
+4. Write test cases for every user_action
 

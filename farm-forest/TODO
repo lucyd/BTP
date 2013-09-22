@@ -1,2 +1,0 @@
-1. Update map_contents also along with _forest_units and _farm_units
-2. In create_farm, check if the input location has the required resources to support the farm
