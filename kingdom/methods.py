@@ -9,6 +9,8 @@ def assign_random_location(unit):
     size = FARM_UNIT_SIZE
   elif unit == 'industry':
     size = INDUSTRY_UNIT_SIZE
+  elif unit == 'hospital':
+    size = HOSPITAL_UNIT_SIZE
   loc = unit_location()
   while True:
     x = random.randrange(0+size, map_size-size)
@@ -171,15 +173,62 @@ def change_production_rate():
   ''' Changes the production rates of industries based on user input '''
   global PRODUCTION_RATE
   global VALID_INDUSTRY_TYPES
-  print 'Current production rates are as follows: '
-  for _industry in PRODUCTION_RATE.keys():
-    print _industry, ': ', PRODUCTION_RATE[_industry]
   print 'Select industry type'
   print_list(VALID_INDUSTRY_TYPES)
   industry_type = input()
   print 'Enter new production-rate: ',
   new_production_rate = input()
   PRODUCTION_RATE[VALID_INDUSTRY_TYPES[industry_type]] = new_production_rate  
+
+def create_hosptials():
+  ''' Creates custom hospital units '''
+  global hospitals
+  global map_contents
+  print 'Enter no.of hospitals to be built: ',
+  hospitals_to_build = input()
+  while hospitals_to_build > 0:
+    hospitals_to_build -= 1
+    new_hospital = hospital()
+    is_location_random = ''
+    while is_location_random not in ['Y', 'N']:
+      print 'Randomize location? (Y/N) : ',
+      is_location_random = raw_input()
+    if is_location_random == 'N':
+      print 'Enter hospital-unit center co-ordinates: '
+      x = input()
+      y = input()
+      if check_map(x,y) is None:
+        new_loc = unit_location(x, y)
+        new_hospital.change_location(new_loc)
+        map_contents[new_loc] = 'hospital'
+      else:
+        print 'Oops!!! Location already assigned'
+        return
+    hospitals.append(new_hospital)
+
+def destroy_hospitals():
+  ''' Destroys specified hospital units '''
+  global hospitals
+  global map_contents
+  print 'Enter no.of hospitals to destroy: ',
+  hospitals_to_destroy = input()
+  while hospitals_to_destroy > 0:
+    hospitals_to_destroy -= 1
+    print 'Enter center coordinates of hospital:'
+    x = input()
+    y = input()
+    for i in range(len(hospitals)):
+      if hospitals[i].location.center == (x,y):
+        map_contents.delete_location(x,y)
+        hospitals = hospitals[:i] + hospitals[i+1:]
+	return
+    print 'Hospital-unit specified not found'
+
+def change_treatment_cost():
+  ''' Changes the treatment cost of every hospital/infirmary'''
+  global TREATMENT_COST
+  print 'Enter new treatment cost: ', 
+  TREATMENT_COST = input()
 
 def list_farms():
   ''' Lists all the farms '''
@@ -209,6 +258,16 @@ def list_resources():
   global PLAYER_RESOURCES
   for resource in PLAYER_RESOURCES.keys():
     print resource, ": ", PLAYER_RESOURCES[resource]
+
+def check_production_rates():
+  ''' Lists the industries and their production rates '''
+  print 'Current production rates are as follows: '
+  for _industry in PRODUCTION_RATE.keys():
+    print _industry, ': ', PRODUCTION_RATE[_industry]
+
+def check_treatment_cost():
+  ''' Lists the current treatment cost '''
+  print 'Current treatment cost: ',TREATMENT_COST
 
 def print_list(_list):
   ''' Prints the contents of _list in an ordered format '''
@@ -255,8 +314,8 @@ def process_user_input(user_action):
     destroy_hospital()
   elif user_action == 'List hospitals/infirmaries':
     list_hospitals()
-  elif user_action == 'Change treatment/medicine price':
-    modify_medicine_price()
+  elif user_action == 'Change treatment/medicine cost':
+    change_treatment_cost()
   elif user_action == 'Change tax':
     change_tax()
   elif user_action == 'Change wages':
@@ -297,4 +356,7 @@ def process_user_input(user_action):
     list_houses()
   elif user_action == 'Check population':
     check_population()
-    
+  elif user_action == 'Check production rates':  
+    check_production_rates()
+  elif user_action == 'Check treatment cost':
+    check_treatment_cost()

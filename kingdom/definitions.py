@@ -58,3 +58,15 @@ class industry:
     # Assuming _type is in VALID_INDUSTRY_TYPES
     self.industry_type = _type
 
+class hospital:
+  ''' The hospital unit class '''
+  def __init__(self):
+    self.location = assign_random_location("hospital")
+    self.age = 0
+
+  def get_location(self):
+    return self.location
+
+  def change_location(self, loc):
+    self.location = loc
+	

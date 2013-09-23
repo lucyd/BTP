@@ -47,6 +47,9 @@ PRODUCTION_RATE = {
 	           'TOBACCO': 10,
 		   'CLOTHING': 25
 		  }
+# HOSPITAL DATA
+HOSPITAL_UNIT_SIZE = 1
+TREATMENT_COST = 10
 
 # General parameters and variables
 # Current time of the game
@@ -64,12 +67,14 @@ PLAYER_RESOURCES = {'water':0, 'wood':0, 'cotton':0, 'tobacco':0, \
 farms = []
 # industries is a list of industry objects
 industries = []
+# hospitals is a list of hospital objects
+hospitals = []
 # List of possible actions the player can take
 agriculture_actions = ['Create farms', 'Destroy farms']
 industry_actions = ['Create industries', 'Destroy industries', \
 		    'Change production rate']
 health_actions = ['Create hospital/infirmary', 'Destroy hospital/infirmary', \
-		  'Change treatment/medicine price']
+		  'Change treatment/medicine cost']
 finance_actions = ['Change tax', 'Change wages', 'Change budget allocation']
 trade_actions = ['Create new trade route', 'Destroy existing trade route', \
 		 'Change export price', 'Change import policy', 'Change export policy']
@@ -79,7 +84,7 @@ education_actions = ['Build school', 'Build university', \
 residence_actions = ['Build houses', 'Destroy houses']
 general_actions = ['List farms', 'List industries', 'List hospitals/infirmaries', \
                    'List schools', 'List universities', 'List houses', \
-                   'Check population']
+                   'Check population', 'Check production rates', 'Check treatment cost']
 # Possible domains in which actions can be taken
 domains = {'Agriculture': agriculture_actions, 'Industry': industry_actions, \
 	   'Health/Safety': health_actions, 'Finance': finance_actions, \
