@@ -54,12 +54,18 @@ TREATMENT_COST = 10
 # General parameters and variables
 # Current time of the game
 time = 0
+# Value of one year
+year = 50
 # Player score
 score = {'Agriculture': 0, 'Industry':0, 'Health/Safety':0, \
          'Finance':0, 'Trade':0, 'Culture':0, 'Education':0, \
          'Residence':0}
 # Kingdom population
 population = 0
+# Tax value
+tax = 0
+# Wages value
+wages = 0
 # Dictionary of player's acquired resources(raw materials and products)
 PLAYER_RESOURCES = {'water':0, 'wood':0, 'cotton':0, 'tobacco':0, \
                     'chilli':0, 'cigarette':0}
@@ -84,7 +90,8 @@ education_actions = ['Build school', 'Build university', \
 residence_actions = ['Build houses', 'Destroy houses']
 general_actions = ['List farms', 'List industries', 'List hospitals/infirmaries', \
                    'List schools', 'List universities', 'List houses', \
-                   'Check population', 'Check production rates', 'Check treatment cost']
+                   'Check population', 'Check production rates', 'Check treatment cost', \
+                   'Check tax', 'Check wages']
 # Possible domains in which actions can be taken
 domains = {'Agriculture': agriculture_actions, 'Industry': industry_actions, \
 	   'Health/Safety': health_actions, 'Finance': finance_actions, \

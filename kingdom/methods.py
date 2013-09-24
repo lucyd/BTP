@@ -230,6 +230,22 @@ def change_treatment_cost():
   print 'Enter new treatment cost: ', 
   TREATMENT_COST = input()
 
+def change_tax():
+  ''' Changes the tax '''
+  global tax
+  print 'Enter new tax: ',
+  tax = input()
+
+def change_wages():
+  ''' Changes the wages '''
+  global wages
+  print 'Enter new wages: ',
+  wages = input()
+
+def change_budget_allocation():
+  ''' Changes the budget allocation '''
+  
+
 def list_farms():
   ''' Lists all the farms '''
   global farms
@@ -261,13 +277,25 @@ def list_resources():
 
 def check_production_rates():
   ''' Lists the industries and their production rates '''
+  global PRODUCTION_RATE
   print 'Current production rates are as follows: '
   for _industry in PRODUCTION_RATE.keys():
     print _industry, ': ', PRODUCTION_RATE[_industry]
 
 def check_treatment_cost():
   ''' Lists the current treatment cost '''
-  print 'Current treatment cost: ',TREATMENT_COST
+  global TREATMENT_COST
+  print 'Current treatment cost: ', TREATMENT_COST
+
+def check_tax():
+  ''' Lists the current tax value '''
+  global tax
+  print 'Current tax value: ', tax
+
+def check_wages():
+  ''' Lists the current wages '''
+  global wages
+  print 'Current wages: ', wages
 
 def print_list(_list):
   ''' Prints the contents of _list in an ordered format '''
@@ -360,3 +388,7 @@ def process_user_input(user_action):
     check_production_rates()
   elif user_action == 'Check treatment cost':
     check_treatment_cost()
+  elif user_action == 'Check tax':
+    check_tax()
+  elif user_action == 'Check wages':
+    check_wages()
