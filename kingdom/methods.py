@@ -11,6 +11,10 @@ def assign_random_location(unit):
     size = INDUSTRY_UNIT_SIZE
   elif unit == 'hospital':
     size = HOSPITAL_UNIT_SIZE
+  elif unit == 'school':
+    size = SCHOOL_UNIT_SIZE
+  elif unit == 'university':
+    size = UNIVERSITY_UNIT_SIZE
   loc = unit_location()
   while True:
     x = random.randrange(0+size, map_size-size)
@@ -40,6 +44,43 @@ def increment_time():
   ''' Increments game time by 1 '''
   global time
   time += 1
+
+def update_workers_needed():
+  ''' Calculates the no.of workers needed for full employment '''
+  global workers_needed
+  global EMPLOYEES_REQUIRED
+  global farms
+  global industries
+  global schools
+  global universities
+  global hospitals
+  workers_needed = EMPLOYEES_REQUIRED['Tax Office']
+  workers_needed += EMPLOYEES_REQUIRED['Trade Office']
+  workers_needed += EMPLOYEES_REQUIRED['Construction']
+  workers_needed += EMPLOYEES_REQUIRED['Farm'] * len(farms)
+  workers_needed += EMPLOYEES_REQUIRED['Industry'] * len(industries)
+  workers_needed += EMPLOYEES_REQUIRED['School'] * len(schools)
+  workers_needed += EMPLOYEES_REQUIRED['University'] * len(universities)
+  workers_needed += EMPLOYEES_REQUIRED['Hospital'] * len(hospitals)
+
+def update_employed_population():
+  ''' Finds the total population that's employed '''
+  global population
+  global employed_population
+  global workers_needed
+  if population <= workers_needed:
+    employed_population = population
+  else:
+    employed_population = workers_needed
+
+def update_budget():
+  ''' Updates the budget '''
+  global budget
+  global tax
+  global wages
+  global population
+  global employed_population
+  budget += (tax*population - wages*employed_population)
 
 def simulate_farm_growth():
   ''' Simulates the farm growth '''
@@ -244,7 +285,17 @@ def change_wages():
 
 def change_budget_allocation():
   ''' Changes the budget allocation '''
-  
+  global budget
+  global ALLOCATED_BUDGET
+  print 'Current budget: ', budget
+  allocated = 0
+  for domain in ALLOCATED_BUDGET.keys():
+    new_budget = budget + 10
+    while new_budget > (budget - allocated):
+      print 'Enter new budget for ', domain, ' : ',
+      new_budget = input()
+    allocated += new_budget
+    ALLOCATED_BUDGET[domain] = new_budget
 
 def list_farms():
   ''' Lists all the farms '''
@@ -297,6 +348,14 @@ def check_wages():
   global wages
   print 'Current wages: ', wages
 
+def check_budget_allocation():
+  ''' Prints the current budget allocation details '''
+  global budget
+  global ALLOCATED_BUDGET
+  for domain in ALLOCATED_BUDGET.keys():
+    print domain, ' : ', ALLOCATED_BUDGET[domain]
+  print 'Total budget : ', budget
+
 def print_list(_list):
   ''' Prints the contents of _list in an ordered format '''
   for i in range(len(_list)):
@@ -304,13 +363,13 @@ def print_list(_list):
 
 def get_user_input():
   ''' Receives the user input '''
-  global domains
-  chosen_domain = len(domains.keys()) + 1
-  while chosen_domain >= len(domains.keys()):
+  global DOMAINS
+  chosen_domain = len(DOMAINS.keys()) + 1
+  while chosen_domain >= len(DOMAINS.keys()):
     print 'Select one of the following domains'
-    print_list(domains.keys())
+    print_list(DOMAINS.keys())
     chosen_domain = input()
-  domain_actions = domains.values()[chosen_domain]
+  domain_actions = DOMAINS.values()[chosen_domain]
   user_action = len(domain_actions) + 1
   while user_action >= len(domain_actions):
     print 'Select one of the following actions'
@@ -392,3 +451,5 @@ def process_user_input(user_action):
     check_tax()
   elif user_action == 'Check wages':
     check_wages()
+  elif user_action == 'Check budget allocation':
+    check_budget_allocation()

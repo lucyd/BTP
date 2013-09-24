@@ -70,3 +70,26 @@ class hospital:
   def change_location(self, loc):
     self.location = loc
 	
+class school:
+  ''' The school unit class '''
+  def __init__(self):
+    self.location = assign_random_location("school")
+    self.age = 0
+
+  def get_location(self):
+    return self.location
+
+  def change_location(self, loc):
+    self.location = loc
+
+class university:
+  ''' The university unit class '''
+  def __init__(self):
+    self.location = assign_random_location("university")
+    self.age = 0
+
+  def get_location(self):
+    return self.location
+
+  def change_location(self, loc):
+    self.location = loc

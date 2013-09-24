@@ -51,21 +51,41 @@ PRODUCTION_RATE = {
 HOSPITAL_UNIT_SIZE = 1
 TREATMENT_COST = 10
 
+SCHOOL_UNIT_SIZE = 1
+UNIVERSITY_UNIT_SIZE = 1
+
 # General parameters and variables
 # Current time of the game
 time = 0
 # Value of one year
 year = 50
 # Player score
-score = {'Agriculture': 0, 'Industry':0, 'Health/Safety':0, \
+SCORE = {'Agriculture': 0, 'Industry':0, 'Health/Safety':0, \
          'Finance':0, 'Trade':0, 'Culture':0, 'Education':0, \
          'Residence':0}
 # Kingdom population
 population = 0
+# Employed population
+employed_population = 0
+# Workers needed for full employment
+workers_needed = 0
+# Employees required for each of the units
+EMPLOYEES_REQUIRED = {'Farm': 5, 'Industry': 10, 'School': 10, \
+                      'University': 10, 'Hospital': 5, 'Tax Office':5, \
+                      'Trade Office':5, 'Construction': 10}
 # Tax value
 tax = 0
 # Wages value
 wages = 0
+# Budget value
+budget = 0
+# Allocated budget values
+ALLOCATED_BUDGET = {'Agriculture':0, 'Industry':0, 'Health/Safety':0, \
+                    'Finance':0, 'Trade':0, 'Culture':0, 'Education':0, \
+                    'Residence':0}
+# Cost of building various units
+COST = {'Farm': 5, 'Industry': 10, 'Hospital': 10, 'School': 5, \
+        'University': 10, 'House': 5, 'Festival': 50}
 # Dictionary of player's acquired resources(raw materials and products)
 PLAYER_RESOURCES = {'water':0, 'wood':0, 'cotton':0, 'tobacco':0, \
                     'chilli':0, 'cigarette':0}
@@ -75,6 +95,10 @@ farms = []
 industries = []
 # hospitals is a list of hospital objects
 hospitals = []
+# schools is a list of school objects
+schools = []
+# universities is a list of university objects
+universities = []
 # List of possible actions the player can take
 agriculture_actions = ['Create farms', 'Destroy farms']
 industry_actions = ['Create industries', 'Destroy industries', \
@@ -91,9 +115,9 @@ residence_actions = ['Build houses', 'Destroy houses']
 general_actions = ['List farms', 'List industries', 'List hospitals/infirmaries', \
                    'List schools', 'List universities', 'List houses', \
                    'Check population', 'Check production rates', 'Check treatment cost', \
-                   'Check tax', 'Check wages']
+                   'Check tax', 'Check wages', 'Check budget allocation']
 # Possible domains in which actions can be taken
-domains = {'Agriculture': agriculture_actions, 'Industry': industry_actions, \
+DOMAINS = {'Agriculture': agriculture_actions, 'Industry': industry_actions, \
 	   'Health/Safety': health_actions, 'Finance': finance_actions, \
 	   'Trade': trade_actions, 'Culture': culture_actions, \
 	   'Education': education_actions, 'Residence': residence_actions, \
