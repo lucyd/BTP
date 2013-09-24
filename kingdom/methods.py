@@ -2,6 +2,11 @@ def assign_random_location(unit):
   ''' Selects a random location from the map and assigns it as the unit '''
   global FARM_UNIT_SIZE
   global INDUSTRY_UNIT_SIZE
+  global HOSPITAL_UNIT_SIZE
+  global SCHOOL_UNIT_SIZE
+  global UNIVERSITY_UNIT_SIZE
+  global CULTURAL_UNIT_SIZE
+  global HOUSE_SIZE
   global map_size
   global map_contents
   size = 1
@@ -15,6 +20,10 @@ def assign_random_location(unit):
     size = SCHOOL_UNIT_SIZE
   elif unit == 'university':
     size = UNIVERSITY_UNIT_SIZE
+  elif unit == 'cultural_unit':
+    size = CULTURAL_UNIT_SIZE
+  elif unit == 'house':
+    size = HOUSE_SIZE
   loc = unit_location()
   while True:
     x = random.randrange(0+size, map_size-size)
@@ -24,6 +33,36 @@ def assign_random_location(unit):
       break
   map_contents[loc] = unit
   return loc
+
+def assign_random_resources():
+  ''' Returns random dict of available resources '''
+  global PLAYER_RESOURCES
+  resources = {}
+  for _resource in PLAYER_RESOURCES.keys():
+    resources[_resource] = random.randrange(0, PLAYER_RESOURCES[_resource])
+  return resources
+
+def receive_input_resources():
+  ''' Returns a resources dict of received values '''
+  global PLAYER_RESOURCES
+  resources = {}
+  for _resource in PLAYER_RESOURCES.keys():
+    resources[_resource] = PLAYER_RESOURCES[_resource] + 10
+    while resources[_resource] > PLAYER_RESOURCES[_resource]:
+      print 'Enter % amount: '%(_resource)
+      resources[_resource] = input()
+  return resources
+
+def update_age():
+  ''' Updates the age of all the units '''
+  global hospitals
+  global schools
+  global universities
+  global cultural_units
+  global houses
+  for unit in hospitals + schools + universities + \
+              cultural_units + houses:
+    unit.age += 1
 
 def check_map(x, y):
   ''' If (x,y) is allocated in the map, returns the unit allocated to.
@@ -46,6 +85,15 @@ def increment_time():
   global time
   time += 1
 
+def update_population():
+  ''' Updates the total population in the kingdom '''
+  global population
+  global houses
+  global HOUSE_CAPACITY
+  population = 0
+  for house in houses:
+    population += HOUSE_CAPACITY[house.house_type]
+
 def update_workers_needed():
   ''' Calculates the no.of workers needed for full employment '''
   global workers_needed
@@ -63,6 +111,7 @@ def update_workers_needed():
   workers_needed += EMPLOYEES_REQUIRED['School'] * len(schools)
   workers_needed += EMPLOYEES_REQUIRED['University'] * len(universities)
   workers_needed += EMPLOYEES_REQUIRED['Hospital'] * len(hospitals)
+  workers_needed += EMPLOYEES_REQUIRED['Culture'] * len(cultural_units)
 
 def update_employed_population():
   ''' Finds the total population that's employed '''
@@ -411,6 +460,80 @@ def change_export_policy():
          _tuple[1] == good_selected:
         _tuple[2] = number_of_goods
 
+def arrange_festival():
+  ''' Arrange a festival '''
+  global time
+  global festivals
+  global COST
+  global ALLOCATED_BUDGET
+  if ALLOCATED_BUDGET['Culture'] < COST['Festival']:
+    print 'Insufficient budget'
+    return
+  festival = new_festival()
+  print 'Enter start time of festival: ',
+  festival.change_start_time(input())
+  print 'Enter duration of festival: ',
+  festival.change_duration(input())
+  print 'Assign random resources?(Y/N) : ',
+  assign_random_resources = raw_input()
+  if assign_random_resources == 'N':
+    festival.change_resources(receive_input_resources())
+  festivals.append(festival)
+
+def build_cultural_units():
+  ''' Builds a cultural unit '''
+  global VALID_CULTURAL_UNIT_TYPES
+  global cultural_units
+  global map_contents
+  global ALLOCATED_BUDGET
+  global COST
+  print 'Enter no.of cultural units to be built: ',
+  cultural_units_to_build = input()
+  while cultural_units_to_build > 0:
+    cultural_units_to_build -= 1
+    if ALLOCATED_BUDGET['Culture'] < COST['Cultural unit']:
+      print 'XXXXX Out of budget XXXXX'
+      return
+    new_cultural_unit = cultural_unit()
+    while check_map(new_cultural_unit.location.center[0], new_cultural_unit.location.center[1]) is not None:
+      new_cultural_unit.change_location(assign_random_location('cultural_unit'))
+    print 'Select cultural_unit type'
+    print_list(VALID_CULTURAL_UNIT_TYPES)
+    cultural_unit_type = input()
+    new_cultural_unit.change_cultural_unit_type(VALID_CULTURAL_UNIT_TYPES[cultural_unit_type]) 
+    is_location_random = ''
+    while is_location_random not in ['Y', 'N']:
+      print 'Randomize location? (Y/N) : ',
+      is_location_random = raw_input()
+    if is_location_random == 'N':
+      print 'Enter cultural_unit center co-ordinates: '
+      x = input()
+      y = input()
+      if check_map(x,y) is None:
+        new_loc = unit_location(x, y)
+        new_farm.change_location(new_loc)
+        map_contents[new_loc] = 'cultural_unit'
+      else:
+        print 'Oops!!! Location already assigned'
+        return
+    cultural_units.append(new_cultural_unit)
+
+def destroy_cultural_units():
+  ''' Destroys specified cultural units '''
+  global cultural_units
+  print 'Enter no.of cultural_units to destroy: ',
+  cultural_units_to_destroy = input()
+  while cultural_units_to_destroy > 0:
+    cultural_units_to_destroy -= 1
+    print 'Enter center coordinates of cultural_unit:'
+    x = input()
+    y = input()
+    for i in range(len(cultural_units)):
+      if cultural_units[i].location.center == (x,y):
+        delete_location(x,y)
+        cultural_units = cultural_units[:i] + cultural_units[i+1:]
+	return
+
 def list_farms():
   ''' Lists all the farms '''
   global farms
@@ -537,8 +660,10 @@ def process_user_input(user_action):
     change_export_policy
   elif user_action == 'Arrange festival':
     arrange_festival()
-  elif user_action == 'Build cultural unit':
-    build_cultural_unit()
+  elif user_action == 'Build cultural units':
+    build_cultural_units()
+  elif user_action == 'Destroy cultural units':
+    destroy_cultural_units()
   elif user_action == 'Build school':
     build_school()
   elif user_action == 'Build university':

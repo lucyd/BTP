@@ -93,3 +93,71 @@ class university:
 
   def change_location(self, loc):
     self.location = loc
+
+class festival:
+  ''' The festival class '''
+  def __init__(self):
+    self.start_time = 0
+    self.duration = 0
+    self.RESOURCES = assign_random_resources()
+
+  def get_start_time(self):
+    return self.start_time
+
+  def get_duration(self):
+    return self.duration
+
+  def get_resources(self):
+    return self.RESOURCES
+
+  def change_start_time(self, _time):
+    self.start_time = _time
+
+  def change_duration(self, _duration):
+    self.duration = _duration
+
+  def change_resources(self, _resources):
+    if type(_resources) == type({}):
+      self.RESOURCES = _resources
+
+class cultural_unit:
+  ''' The cultural unit class '''
+  def __init__(self):
+    self.cultural_unit_type = DEFAULT_CULTURAL_UNIT_TYPE
+    self.location = assign_random_location("cultural_unit")
+    self.age = 0
+
+  def get_location(self):
+    return self.location
+
+  def change_location(self, loc):
+    self.location = loc
+
+  def get_cultural_unit_type(self):
+    return self.cultural_unit_type
+
+  def change_cultural_unit_type(self, _type):
+    if _type in VALID_CULTURAL_UNIT_TYPES:
+      self.cultural_unit_type = _type
+
+def house:
+  ''' The house class '''
+  def __init__(self, _type=None):
+    if _type is None or type.strip() == '':
+      self.house_type = DEFAULT_HOUSE_TYPE
+    self.location = assign_random_location("house")
+    self.age = 0
+
+  def get_location(self):
+    return self.location
+
+  def change_location(self, loc):
+    self.location = loc
+
+  def get_house_type(self):
+    return self.house_type
+
+  def change_house_type(self, _type):
+    if _type in VALID_HOUSE_TYPES:
+      self.house_type = _type
+

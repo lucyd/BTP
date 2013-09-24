@@ -51,8 +51,20 @@ PRODUCTION_RATE = {
 HOSPITAL_UNIT_SIZE = 1
 TREATMENT_COST = 10
 
+# EDUCATION DATA
 SCHOOL_UNIT_SIZE = 1
 UNIVERSITY_UNIT_SIZE = 1
+
+# CULTURE DATA
+CULTURAL_UNIT_SIZE = 1
+VALID_CULTURAL_UNITS = ['Theatre', 'Park', 'Museum']
+DEFAULT_CULTURAL_UNIT_TYPE = 'Theatre'
+
+# RESIDENCE DATA
+HOUSE_SIZE = 1
+VALID_HOUSE_TYPES = ['Hut', 'Apartment', 'Villa']
+DEFAULT_HOUSE_TYPE = 'Apartment'
+HOUSE_CAPACITY = {'Hut': 5, 'Apartment': 15, 'Villa': 25}
 
 # General parameters and variables
 # Current time of the game
@@ -72,7 +84,8 @@ workers_needed = 0
 # Employees required for each of the units
 EMPLOYEES_REQUIRED = {'Farm': 5, 'Industry': 10, 'School': 10, \
                       'University': 10, 'Hospital': 5, 'Tax Office':5, \
-                      'Trade Office':5, 'Construction': 10}
+                      'Trade Office':5, 'Construction': 10, \
+                      'Culture': 5}
 # Tax value
 tax = 0
 # Wages value
@@ -85,7 +98,7 @@ ALLOCATED_BUDGET = {'Agriculture':0, 'Industry':0, 'Health/Safety':0, \
                     'Residence':0}
 # Cost of building various units
 COST = {'Farm': 5, 'Industry': 10, 'Hospital': 10, 'School': 5, \
-        'University': 10, 'House': 5, 'Festival': 50}
+        'University': 10, 'House': 5, 'Festival': 50, 'Cultural unit': 5}
 # Dictionary of player's acquired resources(raw materials and products)
 PLAYER_RESOURCES = {'water':0, 'wood':0, 'cotton':0, 'tobacco':0, \
                     'chilli':0, 'cigarette':0}
@@ -99,6 +112,12 @@ hospitals = []
 schools = []
 # universities is a list of university objects
 universities = []
+# festivals is a list of festival objects
+festivals = []
+# cultural_units is a list of cultural_unit objects
+cultural_units = []
+# houses is a list of house objects
+houses = []
 # List of possible actions the player can take
 agriculture_actions = ['Create farms', 'Destroy farms']
 industry_actions = ['Create industries', 'Destroy industries', \
@@ -108,7 +127,8 @@ health_actions = ['Create hospital/infirmary', 'Destroy hospital/infirmary', \
 finance_actions = ['Change tax', 'Change wages', 'Change budget allocation']
 trade_actions = ['Create new trade route', 'Remove existing trade route', \
 		 'Change export price', 'Change import policy', 'Change export policy']
-culture_actions = ['Arrage festival', 'Build cultural unit']
+culture_actions = ['Arrage festival', 'Build cultural units', \
+                   'Destroy cultural units']
 education_actions = ['Build school', 'Build university', \
 		     'Destroy school', 'Destroy university']
 residence_actions = ['Build houses', 'Destroy houses']
