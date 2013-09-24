@@ -80,7 +80,15 @@ def update_budget():
   global wages
   global population
   global employed_population
+  global import_goods
+  global AVAILABLE_IMPORTS
+  global export_goods
+  global AVAILABLE_EXPORTS
   budget += (tax*population - wages*employed_population)
+  for _import in import_goods:
+    budget -= (_import[2] * AVAILABLE_IMPORTS[_import[0]][_import[1]])
+  for _export in export_goods:
+    budget += (_export[2] * AVAILABLE_EXPORTS[_export[0]][_export[1]])
 
 def simulate_farm_growth():
   ''' Simulates the farm growth '''
@@ -110,6 +118,8 @@ def create_farms():
   while farms_to_build > 0:
     farms_to_build -= 1
     new_farm = farm()
+    while check_map(new_farm.location[0], new_farm.location[1]) is not None:
+      new_farm.change_location(assign_random_location('farm'))
     print 'Select farm type'
     print_list(VALID_FARM_TYPES)
     farm_type = input()
@@ -171,6 +181,8 @@ def create_industry():
   while industries_to_build > 0:
     industries_to_build -= 1
     new_industry = industry()
+    while check_map(new_industry.location[0], new_industry.location[1]) is not None:
+      new_industry.change_location(assign_random_location('industry'))
     print 'Select industry type'
     print_list(VALID_INDUSTRY_TYPES)
     industry_type = input()
@@ -230,6 +242,8 @@ def create_hosptials():
   while hospitals_to_build > 0:
     hospitals_to_build -= 1
     new_hospital = hospital()
+    while check_map(new_hospital.location[0], new_hospital.location[1]) is not None:
+      new_hospital.change_location(assign_random_location('hospital'))
     is_location_random = ''
     while is_location_random not in ['Y', 'N']:
       print 'Randomize location? (Y/N) : ',
@@ -297,6 +311,24 @@ def change_budget_allocation():
     allocated += new_budget
     ALLOCATED_BUDGET[domain] = new_budget
 
+def create_trade_route():
+  ''' Creates a new trade route '''
+  global trade_routes
+  global established_trade_routes
+  print 'Currently established trade routes:'
+  print_list(established_trade_routes)
+  if sorted(trade_routes) == sorted(established_trade_routes):
+    print 'All available trade routes established'
+  else:
+    unestablished_trade_routes = []
+    for route in trade_routes:
+      if route not in established_trade_routes:
+        unestablished_trade_routes.append(route)
+    print 'Select new trade route'
+    print_list(unestablished_trade_routes)
+    selected_route = input()
+    established_trade_routes.append(unestablished_trade_routes[selected_route])
+
 def list_farms():
   ''' Lists all the farms '''
   global farms
@@ -358,6 +390,8 @@ def check_budget_allocation():
 
 def print_list(_list):
   ''' Prints the contents of _list in an ordered format '''
+  if len(_list) == 0:
+    print 'None'
   for i in range(len(_list)):
     print i, ": ", _list[i]
 

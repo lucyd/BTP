@@ -122,6 +122,20 @@ DOMAINS = {'Agriculture': agriculture_actions, 'Industry': industry_actions, \
 	   'Trade': trade_actions, 'Culture': culture_actions, \
 	   'Education': education_actions, 'Residence': residence_actions, \
            'General': general_actions}
-# Index of the action selected by the player
-user_input = None
 
+# TRADE DATA
+trade_routes = ['India', 'America', 'China']
+# Import price data for available trade routes
+AVAILABLE_IMPORTS = {'India': {'chilli': 5, 'cotton': 5},\
+                'America':{'cigarette': 10},\
+                'China':{'wood': 5}}
+# Export price data for available trade routes
+AVAILABLE_EXPORTS = {'India': {'cigarette': 10}, \
+           'America': {'chilli': 5}, \
+           'China': {'cotton': 5}}
+# List of kingdoms importing from
+established_trade_routes = []
+# List of 3-tuples of kingdoms, type of goods importing and number
+import_goods = []
+# List of 3-tuples of kingdoms, type of goods exporting and number
+export_goods = []
