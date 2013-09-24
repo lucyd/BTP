@@ -106,7 +106,7 @@ industry_actions = ['Create industries', 'Destroy industries', \
 health_actions = ['Create hospital/infirmary', 'Destroy hospital/infirmary', \
 		  'Change treatment/medicine cost']
 finance_actions = ['Change tax', 'Change wages', 'Change budget allocation']
-trade_actions = ['Create new trade route', 'Destroy existing trade route', \
+trade_actions = ['Create new trade route', 'Remove existing trade route', \
 		 'Change export price', 'Change import policy', 'Change export policy']
 culture_actions = ['Arrage festival', 'Build cultural unit']
 education_actions = ['Build school', 'Build university', \
@@ -126,13 +126,14 @@ DOMAINS = {'Agriculture': agriculture_actions, 'Industry': industry_actions, \
 # TRADE DATA
 trade_routes = ['India', 'America', 'China']
 # Import price data for available trade routes
-AVAILABLE_IMPORTS = {'India': {'chilli': 5, 'cotton': 5},\
-                'America':{'cigarette': 10},\
-                'China':{'wood': 5}}
+AVAILABLE_IMPORTS = {'chilli': {'India':5}, \
+                     'cotton': {'India':5}, \
+                     'cigarette': {'America':10}, \
+                     'wood': {'China': 5}}
 # Export price data for available trade routes
-AVAILABLE_EXPORTS = {'India': {'cigarette': 10}, \
-           'America': {'chilli': 5}, \
-           'China': {'cotton': 5}}
+AVAILABLE_EXPORTS = {'cigarette': {'India': 10}, \
+                     'chilli': {'America': 5}, \
+                     'cotton': {'China': 5}}
 # List of kingdoms importing from
 established_trade_routes = []
 # List of 3-tuples of kingdoms, type of goods importing and number

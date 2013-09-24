@@ -36,6 +36,7 @@ def check_map(x, y):
 
 def delete_location(x, y):
   ''' Removes the location from map_contents '''
+  global map_contents
   for loc in map_contents.keys():
     if loc.center == (x,y):
       map_contents.pop(loc, None)
@@ -86,9 +87,9 @@ def update_budget():
   global AVAILABLE_EXPORTS
   budget += (tax*population - wages*employed_population)
   for _import in import_goods:
-    budget -= (_import[2] * AVAILABLE_IMPORTS[_import[0]][_import[1]])
+    budget -= (_import[2] * AVAILABLE_IMPORTS[_import[1]][_import[0]])
   for _export in export_goods:
-    budget += (_export[2] * AVAILABLE_EXPORTS[_export[0]][_export[1]])
+    budget += (_export[2] * AVAILABLE_EXPORTS[_export[1]][_export[0]])
 
 def simulate_farm_growth():
   ''' Simulates the farm growth '''
@@ -113,12 +114,17 @@ def create_farms():
   global VALID_FARM_TYPES
   global farms
   global map_contents
+  global ALLOCATED_BUDGET
+  global COST
   print 'Enter no.of farms to be built: ',
   farms_to_build = input()
   while farms_to_build > 0:
     farms_to_build -= 1
+    if ALLOCATED_BUDGET['Agriculture'] < COST['Farm']:
+      print 'XXXXX Out of budget XXXXX'
+      return
     new_farm = farm()
-    while check_map(new_farm.location[0], new_farm.location[1]) is not None:
+    while check_map(new_farm.location.center[0], new_farm.location.center[1]) is not None:
       new_farm.change_location(assign_random_location('farm'))
     print 'Select farm type'
     print_list(VALID_FARM_TYPES)
@@ -144,7 +150,6 @@ def create_farms():
 def destroy_farms():
   ''' Destroys specified farm units '''
   global farms
-  global map_contents
   print 'Enter no.of farms to destroy: ',
   farms_to_destroy = input()
   while farms_to_destroy > 0:
@@ -154,7 +159,7 @@ def destroy_farms():
     y = input()
     for i in range(len(farms)):
       if farms[i].location.center == (x,y):
-        map_contents.delete_location(x,y)
+        delete_location(x,y)
         farms = farms[:i] + farms[i+1:]
 	return
     print 'Farm-unit specified not found'
@@ -169,6 +174,7 @@ def harvest_farm(farm_index):
   _farm_resources = FARM_RESOURCES[farms[farm_index].farm_type]
   for resource in _farm_resources.keys():
     PLAYER_RESOURCES[resource] += (farms[farm_index].age * _farm_resources[resource])
+  delete_location(farms[farm_index].location.center[0], farms[farm_index].location.center[1])
   farms = farms[:farm_index] + farms[farm_index+1:]
 
 def create_industry():
@@ -176,12 +182,17 @@ def create_industry():
   global VALID_INDUSTRY_TYPES
   global industries
   global map_contents
+  global ALLOCATED_BUDGET
+  global COST
   print 'Enter no.of industries to be built: ',
   industries_to_build = input()
   while industries_to_build > 0:
     industries_to_build -= 1
+    if ALLOCATED_BUDGET['Industry'] < COST['Industry']:
+      print 'XXXXX Out of budget XXXXX'
+      return
     new_industry = industry()
-    while check_map(new_industry.location[0], new_industry.location[1]) is not None:
+    while check_map(new_industry.location.center[0], new_industry.location.center[1]) is not None:
       new_industry.change_location(assign_random_location('industry'))
     print 'Select industry type'
     print_list(VALID_INDUSTRY_TYPES)
@@ -207,7 +218,6 @@ def create_industry():
 def destroy_industries():
   ''' Destroys specified industry units '''
   global industries
-  global map_contents
   print 'Enter no.of industries to destroy: ',
   industries_to_destroy = input()
   while industries_to_destroy > 0:
@@ -217,7 +227,7 @@ def destroy_industries():
     y = input()
     for i in range(len(industries)):
       if industries[i].location.center == (x,y):
-        map_contents.delete_location(x,y)
+        delete_location(x,y)
         industries = industries[:i] + industries[i+1:]
 	return
     print 'Industry-unit specified not found'
@@ -237,12 +247,17 @@ def create_hosptials():
   ''' Creates custom hospital units '''
   global hospitals
   global map_contents
+  global ALLOCATED_BUDGET
+  global COST
   print 'Enter no.of hospitals to be built: ',
   hospitals_to_build = input()
   while hospitals_to_build > 0:
     hospitals_to_build -= 1
+    if ALLOCATED_BUDGET['Health/Safety'] < COST['Hospital']:
+      print 'XXXXX Out of budget XXXXX'
+      return
     new_hospital = hospital()
-    while check_map(new_hospital.location[0], new_hospital.location[1]) is not None:
+    while check_map(new_hospital.location.center[0], new_hospital.location.center[1]) is not None:
       new_hospital.change_location(assign_random_location('hospital'))
     is_location_random = ''
     while is_location_random not in ['Y', 'N']:
@@ -264,7 +279,6 @@ def create_hosptials():
 def destroy_hospitals():
   ''' Destroys specified hospital units '''
   global hospitals
-  global map_contents
   print 'Enter no.of hospitals to destroy: ',
   hospitals_to_destroy = input()
   while hospitals_to_destroy > 0:
@@ -274,7 +288,7 @@ def destroy_hospitals():
     y = input()
     for i in range(len(hospitals)):
       if hospitals[i].location.center == (x,y):
-        map_contents.delete_location(x,y)
+        delete_location(x,y)
         hospitals = hospitals[:i] + hospitals[i+1:]
 	return
     print 'Hospital-unit specified not found'
@@ -328,6 +342,74 @@ def create_trade_route():
     print_list(unestablished_trade_routes)
     selected_route = input()
     established_trade_routes.append(unestablished_trade_routes[selected_route])
+
+def remove_trade_route():
+  ''' Removes an existing trade route '''
+  global established_trade_routes
+  print 'Currently established trade routes: '
+  print_list(established_trade_routes)
+  print 'Select a trade route to remove: ',
+  selected_route = input()
+  established_trade_routes = established_trade_routes[:selected_route]\
+                             + established_trade_routes[selected_route+1:]
+
+def change_export_price():
+  ''' Changes export price of goods '''
+  global AVAILABLE_EXPORTS
+  print 'Current export prices:'
+  for export_good in AVAILABLE_EXPORTS.keys():
+    print export_good, ": ", AVAILABLE_EXPORTS[export_good].values()[0]
+  print 'Select a good to change it\'s export price'
+  print_list(AVAILABLE_EXPORTS.keys())
+  selected_good = AVAILABLE_EXPORTS.keys()[input()]
+  print 'Enter new export price: ',
+  new_price = input()
+  for kingdom in AVAILABLE_EXPORTS[selected_good].keys():
+    AVAILABLE_EXPORTS[selected_good][kingdom] = new_price
+
+def change_import_policy():
+  ''' Changes import policy - type and no.of imports '''
+  global AVAILABLE_IMPORTS
+  global import_goods
+  print 'Current import policy'
+  for _tuple in import_goods:
+    print 'Kingdom: ', _tuple[0], 'Good: ', _tuple[1], 'Number: ', _tuple[2]
+  done = 'N'
+  while done != 'Y':
+    'Done changing import policy?(Y/N): ',
+    done = raw_input()
+    print 'Select a kingdom: ',
+    kingdom_selected = raw_input()
+    print 'Select a good: ',
+    good_selected = raw_input()
+    print 'Enter no.of goods to import: ',
+    number_of_goods = input()
+    for _tuple in import_goods:
+      if _tuple[0] == kingdom_selected and \
+         _tuple[1] == good_selected:
+        _tuple[2] = number_of_goods
+
+def change_export_policy():
+  ''' Changes export policy - type and no.of exports '''
+  global AVAILABLE_EXPORTS
+  global export_goods
+  print 'Current export policy'
+  for _tuple in export_goods:
+    print 'Kingdom: ', _tuple[0], 'Good: ', _tuple[1], 'Number: ', _tuple[2]
+  done = 'N'
+  while done != 'Y':
+    'Done changing export policy?(Y/N): ',
+    done = raw_input()
+    print 'Select a kingdom: ',
+    kingdom_selected = raw_input()
+    print 'Select a good: ',
+    good_selected = raw_input()
+    print 'Enter no.of goods to export: ',
+    number_of_goods = input()
+    for _tuple in export_goods:
+      if _tuple[0] == kingdom_selected and \
+         _tuple[1] == good_selected:
+        _tuple[2] = number_of_goods
 
 def list_farms():
   ''' Lists all the farms '''
@@ -445,8 +527,8 @@ def process_user_input(user_action):
     change_budget_allocation()
   elif user_action == 'Create new trade route':
     create_trade_route()
-  elif user_action == 'Destroy existing trade route':
-    destroy_trade_route()
+  elif user_action == 'Remove existing trade route':
+    remove_trade_route()
   elif user_action == 'Change export price':
     change_export_price()
   elif user_action == 'Change import policy':
