@@ -140,7 +140,7 @@ class cultural_unit:
     if _type in VALID_CULTURAL_UNIT_TYPES:
       self._type = _type
 
-def house:
+class house:
   ''' The house class '''
   def __init__(self, _type=None):
     if _type is None or type.strip() == '':

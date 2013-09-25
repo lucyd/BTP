@@ -74,9 +74,9 @@ wages = 0
 # Budget value
 budget = 0
 # Allocated budget values
-ALLOCATED_BUDGET = {'Agriculture':0, 'Industry':0, 'Health/Safety':0, \
-                    'Finance':0, 'Trade':0, 'Culture':0, 'Education':0, \
-                    'Residence':0}
+ALLOCATED_BUDGET = {'Agriculture':100, 'Industry':100, 'Health/Safety':50, \
+                    'Finance':100, 'Trade':80, 'Culture':75, 'Education':50, \
+                    'Residence':100}
 # Cost of building various units
 COST = {'Farm': 5, 'Industry': 10, 'Hospital': 10, 'School': 5, \
         'University': 10, 'Hut': 5, 'Apartment': 15, 'Villa': 25, \
@@ -127,7 +127,7 @@ SCORE = {'Agriculture': 0, 'Industry':0, 'Health/Safety':0, \
          'Finance':0, 'Trade':0, 'Culture':0, 'Education':0, \
          'Residence':0}
 # Kingdom population
-population = 0
+population = 10
 # Employed population
 employed_population = 0
 # Workers needed for full employment
@@ -149,7 +149,7 @@ health_actions = ['Create hospital/infirmary', 'Destroy hospital/infirmary', \
 finance_actions = ['Change tax', 'Change wages', 'Change budget allocation']
 trade_actions = ['Create new trade route', 'Remove existing trade route', \
 		 'Change export price', 'Change import policy', 'Change export policy']
-culture_actions = ['Arrage festival', 'Build cultural units', \
+culture_actions = ['Arrage a festival', 'Build cultural units', \
                    'Destroy cultural units']
 education_actions = ['Build school', 'Build university', \
 		     'Destroy schools', 'Destroy universities']

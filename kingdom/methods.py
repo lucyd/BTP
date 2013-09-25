@@ -25,12 +25,12 @@ def assign_random_location(unit):
   elif unit == 'house':
     size = HOUSE_SIZE
   loc = unit_location()
-  while True:
+  x = random.randrange(0+size, map_size-size)
+  y = random.randrange(0+size, map_size-size)
+  while check_map(x,y) is not None:
     x = random.randrange(0+size, map_size-size)
     y = random.randrange(0+size, map_size-size)
-    loc.set_center(x,y)
-    if loc not in map_contents.keys():
-      break
+  loc.set_center(x,y)
   map_contents[loc] = unit
   return loc
 
@@ -134,9 +134,11 @@ def update_budget():
   global AVAILABLE_IMPORTS
   global export_goods
   global AVAILABLE_EXPORTS
+  global ALLOCATED_BUDGET
   budget += (tax*population - wages*employed_population)
   for _import in import_goods:
     budget -= (_import[2] * AVAILABLE_IMPORTS[_import[1]][_import[0]])
+    ALLOCATED_BUDGET['Trade'] -= (_import[2] * AVAILABLE_IMPORTS[_import[1]][_import[0]])
   for _export in export_goods:
     budget += (_export[2] * AVAILABLE_EXPORTS[_export[1]][_export[0]])
 
@@ -222,8 +224,6 @@ def create_farms():
       print 'XXXXX Out of budget XXXXX'
       return
     new_farm = farm()
-    while check_map(new_farm.location.center[0], new_farm.location.center[1]) is not None:
-      new_farm.change_location(assign_random_location('farm'))
     print 'Select farm type'
     print_list(VALID_FARM_TYPES)
     farm_type = input()
@@ -243,6 +243,7 @@ def create_farms():
       else:
         print 'Oops!!! Location already assigned'
         return
+    ALLOCATED_BUDGET['Agriculture'] -= COST['Farm']
     farms.append(new_farm)
 
 def destroy_farms():
@@ -290,8 +291,6 @@ def create_industries():
       print 'XXXXX Out of budget XXXXX'
       return
     new_industry = industry()
-    while check_map(new_industry.location.center[0], new_industry.location.center[1]) is not None:
-      new_industry.change_location(assign_random_location('industry'))
     print 'Select industry type'
     print_list(VALID_INDUSTRY_TYPES)
     industry_type = input()
@@ -311,6 +310,7 @@ def create_industries():
       else:
         print 'Oops!!! Location already assigned'
         return
+    ALLOCATED_BUDGET['Industry'] -= COST['Industry']
     industries.append(new_industry)
 
 def destroy_industries():
@@ -354,8 +354,6 @@ def create_hosptials():
       print 'XXXXX Out of budget XXXXX'
       return
     new_hospital = hospital()
-    while check_map(new_hospital.location.center[0], new_hospital.location.center[1]) is not None:
-      new_hospital.change_location(assign_random_location('hospital'))
     is_location_random = ''
     while is_location_random not in ['Y', 'N']:
       print 'Randomize location? (Y/N) : ',
@@ -371,6 +369,7 @@ def create_hosptials():
       else:
         print 'Oops!!! Location already assigned'
         return
+    ALLOCATED_BUDGET['Health/Safety'] -= COST['Hospital']
     hospitals.append(new_hospital)
 
 def destroy_hospitals():
@@ -421,6 +420,9 @@ def change_budget_allocation():
       new_budget = input()
     allocated += new_budget
     ALLOCATED_BUDGET[domain] = new_budget
+  if allocated != budget:
+    print 'Budget doesn\'t add up'
+    change_budget_allocation()
 
 def create_trade_route():
   ''' Creates a new trade route '''
@@ -495,8 +497,6 @@ def change_export_policy():
     print 'Kingdom: ', _tuple[0], 'Good: ', _tuple[1], 'Number: ', _tuple[2]
   done = 'N'
   while done != 'Y':
-    'Done changing export policy?(Y/N): ',
-    done = raw_input()
     print 'Select a kingdom: ',
     kingdom_selected = raw_input()
     print 'Select a good: ',
@@ -507,6 +507,8 @@ def change_export_policy():
       if _tuple[0] == kingdom_selected and \
          _tuple[1] == good_selected:
         _tuple[2] = number_of_goods
+    print 'Done changing export policy?(Y/N): ',
+    done = raw_input()
 
 def arrange_festival():
   ''' Arrange a festival '''
@@ -543,8 +545,6 @@ def build_cultural_units():
       print 'XXXXX Out of budget XXXXX'
       return
     new_cultural_unit = cultural_unit()
-    while check_map(new_cultural_unit.location.center[0], new_cultural_unit.location.center[1]) is not None:
-      new_cultural_unit.change_location(assign_random_location('cultural_unit'))
     print 'Select cultural_unit type'
     print_list(VALID_CULTURAL_UNIT_TYPES)
     cultural_unit_type = input()
@@ -564,6 +564,7 @@ def build_cultural_units():
       else:
         print 'Oops!!! Location already assigned'
         return
+    ALLOCATED_BUDGET['Culture'] -= COST['Cultural unit']
     cultural_units.append(new_cultural_unit)
 
 def destroy_cultural_units():
@@ -596,8 +597,6 @@ def build_schools():
       print 'XXXXX Out of budget XXXXX'
       return
     new_school = school()
-    while check_map(new_school.location.center[0], new_school.location.center[1]) is not None:
-      new_school.change_location(assign_random_location('school'))
     is_location_random = ''
     while is_location_random not in ['Y', 'N']:
       print 'Randomize location? (Y/N) : ',
@@ -613,6 +612,7 @@ def build_schools():
       else:
         print 'Oops!!! Location already assigned'
         return
+    ALLOCATED_BUDGET['Education'] -= COST['School']
     schools.append(new_school)
 
 def destroy_schools():
@@ -645,8 +645,6 @@ def build_universities():
       print 'XXXXX Out of budget XXXXX'
       return
     new_university = university()
-    while check_map(new_university.location.center[0], new_university.location.center[1]) is not None:
-      new_university.change_location(assign_random_location('university'))
     is_location_random = ''
     while is_location_random not in ['Y', 'N']:
       print 'Randomize location? (Y/N) : ',
@@ -662,6 +660,7 @@ def build_universities():
       else:
         print 'Oops!!! Location already assigned'
         return
+    ALLOCATED_BUDGET['Education'] -= COST['University']
     universities.append(new_university)
 
 def destroy_universities():
@@ -692,8 +691,6 @@ def build_houses():
   while houses_to_build > 0:
     houses_to_build -= 1
     new_house = house()
-    while check_map(new_house.location.center[0], new_house.location.center[1]) is not None:
-      new_house.change_location(assign_random_location('house'))
     print 'Select house type'
     print_list(VALID_HOUSE_TYPES)
     house_type = input()
@@ -716,6 +713,7 @@ def build_houses():
       else:
         print 'Oops!!! Location already assigned'
         return
+    ALLOCATED_BUDGET['Residence'] -= COST[new_house._type]
     houses.append(new_house)
 
 def destroy_houses():
@@ -806,6 +804,13 @@ def list_resources():
   for resource in PLAYER_RESOURCES.keys():
     print resource, ": ", PLAYER_RESOURCES[resource]
 
+def check_population():
+  ''' Prints the current population statistics '''
+  global population
+  print 'Overall population: ', population
+  print 'Employed population: ', employed_population
+  print 'Workers needed: ', workers_needed
+
 def check_production_rates():
   ''' Lists the industries and their production rates '''
   global PRODUCTION_RATE
@@ -838,8 +843,9 @@ def check_budget_allocation():
 
 def check_score():
   ''' Prints the player's current score '''
-  global score
-  print 'Current score: ', score
+  global SCORE
+  for key in SCORE.keys():
+    print key, ': ', SCORE[key]
 
 def print_list(_list):
   ''' Prints the contents of _list in an ordered format '''
@@ -905,8 +911,8 @@ def process_user_input(user_action):
   elif user_action == 'Change import policy':
     change_import_policy()
   elif user_action == 'Change export policy':
-    change_export_policy
-  elif user_action == 'Arrange festival':
+    change_export_policy()
+  elif user_action == 'Arrange a festival':
     arrange_festival()
   elif user_action == 'Build cultural units':
     build_cultural_units()
