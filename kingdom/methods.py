@@ -92,7 +92,7 @@ def update_population():
   global HOUSE_CAPACITY
   population = 0
   for house in houses:
-    population += HOUSE_CAPACITY[house.house_type]
+    population += HOUSE_CAPACITY[house._type]
 
 def update_workers_needed():
   ''' Calculates the no.of workers needed for full employment '''
@@ -140,14 +140,63 @@ def update_budget():
   for _export in export_goods:
     budget += (_export[2] * AVAILABLE_EXPORTS[_export[1]][_export[0]])
 
+def calculate_diff(_list):
+  ''' Returns the diff of elements of _list
+      Used in calculation of score '''
+  types_dict = {}
+  for _element in _list:
+    if _element not in types_dict.keys():
+     types_dict[_element._type] = 1
+    else:
+     types_dict[_element._type] += 1
+  diff_elements = 0
+  for i in range(len(types_dict.keys())):
+    for j in range(i+1, len(types_dict.keys())):
+      diff_elements += abs(types_dict[types_dict.keys()[i]] \
+                     - types_dict[types_dict.keys()[j]])
+  return diff_elements
+
+def update_score():
+  ''' Updates the player's score '''
+  global SCORE
+  global farms
+  global industries
+  global budget
+  global established_trade_routes
+  global import_goods
+  global export_goods
+  global festivals
+  global cultural_units
+  global schools
+  global universities
+  global houses
+  global workers_needed
+  # Agriculture score
+  SCORE['Agriculture'] = len(farms) - calculate_diff(farms)
+  # Industry score
+  SCORE['Industry']  = len(industries) - calculate_diff(industries)
+  # Health/Safety score
+  SCORE['Health/Safety']  = len(hospitals)
+  # Finance score
+  SCORE['Finance'] = budget
+  # Trade score
+  SCORE['Trade'] = len(established_trade_routes) + \
+                   len(import_goods) + len(export_goods)
+  # Culture score
+  SCORE['Culture'] = len(festivals) + len(cultural_units) - calculate_diff(cultural_units)
+  # Education score
+  SCORE['Education'] = len(schools) + len(universities)
+  # Residence score
+  SCORE['Residence'] = len(houses) - calculate_diff(houses) - workers_needed
+ 
 def simulate_farm_growth():
   ''' Simulates the farm growth '''
   global farms
   global FARM_GROWTH_RATE
   global FARM_LIFE_SPAN
   for farm in farms:
-    farm.age += (FARM_GROWTH_RATE[farm.farm_type])
-    if farm.age >= FARM_LIFE_SPAN[farm.farm_type]:
+    farm.age += (FARM_GROWTH_RATE[farm._type])
+    if farm.age >= FARM_LIFE_SPAN[farm._type]:
       harvest_farm(farms.index(farm))
 
 def simulate_industry_production():
@@ -156,7 +205,7 @@ def simulate_industry_production():
   global PRODUCTION_RATE
   for industry  in industries:
     industry.age += 1
-    industry.gross_product += PRODUCTION_RATE[industry.industry_type]
+    industry.gross_product += PRODUCTION_RATE[industry._type]
 
 def create_farms():
   ''' Creates custom farm units '''
@@ -220,13 +269,13 @@ def harvest_farm(farm_index):
   global PLAYER_RESOURCES
   if farm_index >= len(farms):
     print 'Farm unit %d not found'%(farm_index)
-  _farm_resources = FARM_RESOURCES[farms[farm_index].farm_type]
+  _farm_resources = FARM_RESOURCES[farms[farm_index]._type]
   for resource in _farm_resources.keys():
     PLAYER_RESOURCES[resource] += (farms[farm_index].age * _farm_resources[resource])
   delete_location(farms[farm_index].location.center[0], farms[farm_index].location.center[1])
   farms = farms[:farm_index] + farms[farm_index+1:]
 
-def create_industry():
+def create_industries():
   ''' Creates custom industry units'''
   global VALID_INDUSTRY_TYPES
   global industries
@@ -289,8 +338,7 @@ def change_production_rate():
   print_list(VALID_INDUSTRY_TYPES)
   industry_type = input()
   print 'Enter new production-rate: ',
-  new_production_rate = input()
-  PRODUCTION_RATE[VALID_INDUSTRY_TYPES[industry_type]] = new_production_rate  
+  PRODUCTION_RATE[VALID_INDUSTRY_TYPES[industry_type]] = input()
 
 def create_hosptials():
   ''' Creates custom hospital units '''
@@ -481,7 +529,7 @@ def arrange_festival():
   festivals.append(festival)
 
 def build_cultural_units():
-  ''' Builds a cultural unit '''
+  ''' Builds cultural units '''
   global VALID_CULTURAL_UNIT_TYPES
   global cultural_units
   global map_contents
@@ -511,7 +559,7 @@ def build_cultural_units():
       y = input()
       if check_map(x,y) is None:
         new_loc = unit_location(x, y)
-        new_farm.change_location(new_loc)
+        new_cultural_unit.change_location(new_loc)
         map_contents[new_loc] = 'cultural_unit'
       else:
         print 'Oops!!! Location already assigned'
@@ -534,6 +582,159 @@ def destroy_cultural_units():
         cultural_units = cultural_units[:i] + cultural_units[i+1:]
 	return
 
+def build_schools():
+  ''' Builds school units'''
+  global schools
+  global map_contents
+  global ALLOCATED_BUDGET
+  global COST
+  print 'Enter no.of schools to be built: ',
+  schools_to_build = input()
+  while schools_to_build > 0:
+    schools_to_build -= 1
+    if ALLOCATED_BUDGET['Education'] < COST['School']:
+      print 'XXXXX Out of budget XXXXX'
+      return
+    new_school = school()
+    while check_map(new_school.location.center[0], new_school.location.center[1]) is not None:
+      new_school.change_location(assign_random_location('school'))
+    is_location_random = ''
+    while is_location_random not in ['Y', 'N']:
+      print 'Randomize location? (Y/N) : ',
+      is_location_random = raw_input()
+    if is_location_random == 'N':
+      print 'Enter school center co-ordinates: '
+      x = input()
+      y = input()
+      if check_map(x,y) is None:
+        new_loc = unit_location(x, y)
+        new_school.change_location(new_loc)
+        map_contents[new_loc] = 'school'
+      else:
+        print 'Oops!!! Location already assigned'
+        return
+    schools.append(new_school)
+
+def destroy_schools():
+  ''' Destroys specified schools '''
+  global schools
+  print 'Enter no.of schools to destroy: ',
+  schools_to_destroy = input()
+  while schools_to_destroy > 0:
+    schools_to_destroy -= 1
+    print 'Enter center coordinates of school:'
+    x = input()
+    y = input()
+    for i in range(len(schools)):
+      if schools[i].location.center == (x,y):
+        delete_location(x,y)
+        schools = schools[:i] + schools[i+1:]
+	return
+
+def build_universities():
+  ''' Builds university units'''
+  global universities
+  global map_contents
+  global ALLOCATED_BUDGET
+  global COST
+  print 'Enter no.of universities to be built: ',
+  universities_to_build = input()
+  while universities_to_build > 0:
+    universities_to_build -= 1
+    if ALLOCATED_BUDGET['Education'] < COST['University']:
+      print 'XXXXX Out of budget XXXXX'
+      return
+    new_university = university()
+    while check_map(new_university.location.center[0], new_university.location.center[1]) is not None:
+      new_university.change_location(assign_random_location('university'))
+    is_location_random = ''
+    while is_location_random not in ['Y', 'N']:
+      print 'Randomize location? (Y/N) : ',
+      is_location_random = raw_input()
+    if is_location_random == 'N':
+      print 'Enter university center co-ordinates: '
+      x = input()
+      y = input()
+      if check_map(x,y) is None:
+        new_loc = unit_location(x, y)
+        new_university.change_location(new_loc)
+        map_contents[new_loc] = 'university'
+      else:
+        print 'Oops!!! Location already assigned'
+        return
+    universities.append(new_university)
+
+def destroy_universities():
+  ''' Destroys specified universities '''
+  global universities
+  print 'Enter no.of universities to destroy: ',
+  universities_to_destroy = input()
+  while universities_to_destroy > 0:
+    universities_to_destroy -= 1
+    print 'Enter center coordinates of university:'
+    x = input()
+    y = input()
+    for i in range(len(universities)):
+      if universities[i].location.center == (x,y):
+        delete_location(x,y)
+        universities = universities[:i] + universities[i+1:]
+	return
+
+def build_houses():
+  ''' Builds houses '''
+  global VALID_HOUSE_TYPES
+  global houses
+  global map_contents
+  global ALLOCATED_BUDGET
+  global COST
+  print 'Enter no.of houses to be built: ',
+  houses_to_build = input()
+  while houses_to_build > 0:
+    houses_to_build -= 1
+    new_house = house()
+    while check_map(new_house.location.center[0], new_house.location.center[1]) is not None:
+      new_house.change_location(assign_random_location('house'))
+    print 'Select house type'
+    print_list(VALID_HOUSE_TYPES)
+    house_type = input()
+    if ALLOCATED_BUDGET['Residence'] < COST[VALID_HOUSE_TYPES[house_type]]:
+      print 'XXXXX Out of budget XXXXX'
+      return
+    new_house.change_house_type(VALID_HOUSE_TYPES[house_type]) 
+    is_location_random = ''
+    while is_location_random not in ['Y', 'N']:
+      print 'Randomize location? (Y/N) : ',
+      is_location_random = raw_input()
+    if is_location_random == 'N':
+      print 'Enter house center co-ordinates: '
+      x = input()
+      y = input()
+      if check_map(x,y) is None:
+        new_loc = unit_location(x, y)
+        new_house.change_location(new_loc)
+        map_contents[new_loc] = 'house'
+      else:
+        print 'Oops!!! Location already assigned'
+        return
+    houses.append(new_house)
+
+def destroy_houses():
+  ''' Destroys specified houses '''
+  global houses
+  print 'Enter no.of houses to destroy: ',
+  houses_to_destroy = input()
+  while houses_to_destroy > 0:
+    houses_to_destroy -= 1
+    print 'Enter center coordinates of house:'
+    x = input()
+    y = input()
+    for i in range(len(houses)):
+      if houses[i].location.center == (x,y):
+        delete_location(x,y)
+        houses = houses[:i] + houses[i+1:]
+	return
+    print 'House specified not found'
+
 def list_farms():
   ''' Lists all the farms '''
   global farms
@@ -541,7 +742,7 @@ def list_farms():
     print 'No farms in the map'
     return
   for farm in farms:
-    print "Type:", farm.farm_type, \
+    print "Type:", farm._type, \
           "  Center:", farm.location.center, \
           "  Age:", farm.age
 
@@ -552,10 +753,52 @@ def list_industries():
     print 'No industries in the map'
     return
   for industry in industries:
-    print "Type:", industry.industry_type, \
+    print "Type:", industry._type, \
           "  Center:", industry.location.center, \
           "  Age:", industry.age, \
           "  Gross product:", industry.gross_product
+
+def list_cultural_units():
+  ''' Lists all cultural units '''
+  global cultural_units
+  if cultural_units == []:
+    print 'No cultural units in the kingdom'
+    return
+  for cult_unit in cultural_units:
+    print 'Type:', cult_unit._type, \
+          ' Center:', cult_unit.location.center, \
+          ' Age:', cult_unit.age
+
+def list_schools():
+  ''' Lists all schools '''
+  global schools
+  if schools == []:
+    print 'No schools in the kingdom'
+    return
+  for _school in schools:
+    print ' Center:', _school.location.center, \
+          ' Age:', _school.age
+
+def list_universities():
+  ''' Lists all universities '''
+  global universities
+  if universities == []:
+    print 'No universities in the kingdom'
+    return
+  for _university in universities:
+    print ' Center:', _university.location.center, \
+          ' Age:', _university.age
+
+def list_houses():
+  ''' Lists all houses '''
+  global houses
+  if houses == []:
+    print 'No houses in the kingdom'
+    return
+  for _house in houses:
+    print 'Type:', _house._type, \
+          ' Center:', _house.location.center, \
+          ' Age:', _house.age
 
 def list_resources():
   ''' Lists the player's acquired resources '''
@@ -592,6 +835,11 @@ def check_budget_allocation():
   for domain in ALLOCATED_BUDGET.keys():
     print domain, ' : ', ALLOCATED_BUDGET[domain]
   print 'Total budget : ', budget
+
+def check_score():
+  ''' Prints the player's current score '''
+  global score
+  print 'Current score: ', score
 
 def print_list(_list):
   ''' Prints the contents of _list in an ordered format '''
@@ -634,10 +882,10 @@ def process_user_input(user_action):
     list_industries()
   elif user_action == 'Change production rate':
     change_production_rate()
-  elif user_action == 'Create hospital/infirmary':
-    create_hospital()
-  elif user_action == 'Destroy hospital/infirmary':
-    destroy_hospital()
+  elif user_action == 'Create hospitals/infirmaries':
+    create_hospitals()
+  elif user_action == 'Destroy hospitals/infirmaries':
+    destroy_hospitals()
   elif user_action == 'List hospitals/infirmaries':
     list_hospitals()
   elif user_action == 'Change treatment/medicine cost':
@@ -664,14 +912,16 @@ def process_user_input(user_action):
     build_cultural_units()
   elif user_action == 'Destroy cultural units':
     destroy_cultural_units()
+  elif user_action == 'List cultural units':
+    list_cultural_units()
   elif user_action == 'Build school':
     build_school()
   elif user_action == 'Build university':
     build_university()
-  elif user_action == 'Destroy school':
-    destroy_school()
-  elif user_action == 'Destroy university':
-    destroy_university()
+  elif user_action == 'Destroy schools':
+    destroy_schools()
+  elif user_action == 'Destroy universities':
+    destroy_universities()
   elif user_action == 'List schools':
     list_schools()
   elif user_action == 'List universities':
@@ -694,3 +944,7 @@ def process_user_input(user_action):
     check_wages()
   elif user_action == 'Check budget allocation':
     check_budget_allocation()
+  elif user_action == 'Check score':
+    check_score()
+  elif user_action == 'List my resources':
+    list_resources()

@@ -38,6 +38,8 @@ FARM_RESOURCES = {
        'TOBACCO' : {'wood':3, 'tobacco':10},
        'CHILLI' : {'wood':1, 'chilli':10}
 }
+# farms is a list of farm objects
+farms = []
 
 # INDUSTRY DATA
 INDUSTRY_UNIT_SIZE = 1
@@ -47,24 +49,73 @@ PRODUCTION_RATE = {
 	           'TOBACCO': 10,
 		   'CLOTHING': 25
 		  }
-# HOSPITAL DATA
+# industries is a list of industry objects
+industries = []
+
+# HEALTH/SAFETY DATA
 HOSPITAL_UNIT_SIZE = 1
 TREATMENT_COST = 10
+# hospitals is a list of hospital objects
+hospitals = []
 
 # EDUCATION DATA
 SCHOOL_UNIT_SIZE = 1
 UNIVERSITY_UNIT_SIZE = 1
+# schools is a list of school objects
+schools = []
+# universities is a list of university objects
+universities = []
+
+# FINANCE DATA
+# Tax value
+tax = 0
+# Wages value
+wages = 0
+# Budget value
+budget = 0
+# Allocated budget values
+ALLOCATED_BUDGET = {'Agriculture':0, 'Industry':0, 'Health/Safety':0, \
+                    'Finance':0, 'Trade':0, 'Culture':0, 'Education':0, \
+                    'Residence':0}
+# Cost of building various units
+COST = {'Farm': 5, 'Industry': 10, 'Hospital': 10, 'School': 5, \
+        'University': 10, 'Hut': 5, 'Apartment': 15, 'Villa': 25, \
+        'Festival': 50, 'Cultural unit': 5}
+
+# TRADE DATA
+trade_routes = ['India', 'America', 'China']
+# Import price data for available trade routes
+AVAILABLE_IMPORTS = {'chilli': {'India':5}, \
+                     'cotton': {'India':5}, \
+                     'cigarette': {'America':10}, \
+                     'wood': {'China': 5}}
+# Export price data for available trade routes
+AVAILABLE_EXPORTS = {'cigarette': {'India': 10}, \
+                     'chilli': {'America': 5}, \
+                     'cotton': {'China': 5}}
+# List of kingdoms importing from
+established_trade_routes = []
+# List of 3-tuples of kingdoms, type of goods importing and number
+import_goods = []
+# List of 3-tuples of kingdoms, type of goods exporting and number
+export_goods = []
 
 # CULTURE DATA
 CULTURAL_UNIT_SIZE = 1
 VALID_CULTURAL_UNITS = ['Theatre', 'Park', 'Museum']
 DEFAULT_CULTURAL_UNIT_TYPE = 'Theatre'
+# festivals is a list of festival objects
+festivals = []
+# cultural_units is a list of cultural_unit objects
+cultural_units = []
 
 # RESIDENCE DATA
 HOUSE_SIZE = 1
 VALID_HOUSE_TYPES = ['Hut', 'Apartment', 'Villa']
 DEFAULT_HOUSE_TYPE = 'Apartment'
 HOUSE_CAPACITY = {'Hut': 5, 'Apartment': 15, 'Villa': 25}
+# houses is a list of house objects
+houses = []
 
 # General parameters and variables
 # Current time of the game
@@ -86,38 +137,9 @@ EMPLOYEES_REQUIRED = {'Farm': 5, 'Industry': 10, 'School': 10, \
                       'University': 10, 'Hospital': 5, 'Tax Office':5, \
                       'Trade Office':5, 'Construction': 10, \
                       'Culture': 5}
-# Tax value
-tax = 0
-# Wages value
-wages = 0
-# Budget value
-budget = 0
-# Allocated budget values
-ALLOCATED_BUDGET = {'Agriculture':0, 'Industry':0, 'Health/Safety':0, \
-                    'Finance':0, 'Trade':0, 'Culture':0, 'Education':0, \
-                    'Residence':0}
-# Cost of building various units
-COST = {'Farm': 5, 'Industry': 10, 'Hospital': 10, 'School': 5, \
-        'University': 10, 'House': 5, 'Festival': 50, 'Cultural unit': 5}
 # Dictionary of player's acquired resources(raw materials and products)
 PLAYER_RESOURCES = {'water':0, 'wood':0, 'cotton':0, 'tobacco':0, \
                     'chilli':0, 'cigarette':0}
-# farms is a list of farm objects
-farms = []
-# industries is a list of industry objects
-industries = []
-# hospitals is a list of hospital objects
-hospitals = []
-# schools is a list of school objects
-schools = []
-# universities is a list of university objects
-universities = []
-# festivals is a list of festival objects
-festivals = []
-# cultural_units is a list of cultural_unit objects
-cultural_units = []
-# houses is a list of house objects
-houses = []
 # List of possible actions the player can take
 agriculture_actions = ['Create farms', 'Destroy farms']
 industry_actions = ['Create industries', 'Destroy industries', \
@@ -130,12 +152,14 @@ trade_actions = ['Create new trade route', 'Remove existing trade route', \
 culture_actions = ['Arrage festival', 'Build cultural units', \
                    'Destroy cultural units']
 education_actions = ['Build school', 'Build university', \
-		     'Destroy school', 'Destroy university']
+		     'Destroy schools', 'Destroy universities']
 residence_actions = ['Build houses', 'Destroy houses']
 general_actions = ['List farms', 'List industries', 'List hospitals/infirmaries', \
                    'List schools', 'List universities', 'List houses', \
-                   'Check population', 'Check production rates', 'Check treatment cost', \
-                   'Check tax', 'Check wages', 'Check budget allocation']
+                   'List cultural units', 'Check population', 'Check production rates', \
+                   'Check treatment cost', 'Check tax', 'Check wages', \
+                   'Check budget allocation', 'Check score', 'List my resources']
+
 # Possible domains in which actions can be taken
 DOMAINS = {'Agriculture': agriculture_actions, 'Industry': industry_actions, \
 	   'Health/Safety': health_actions, 'Finance': finance_actions, \
@@ -143,20 +167,3 @@ DOMAINS = {'Agriculture': agriculture_actions, 'Industry': industry_actions, \
 	   'Education': education_actions, 'Residence': residence_actions, \
            'General': general_actions}
 
-# TRADE DATA
-trade_routes = ['India', 'America', 'China']
-# Import price data for available trade routes
-AVAILABLE_IMPORTS = {'chilli': {'India':5}, \
-                     'cotton': {'India':5}, \
-                     'cigarette': {'America':10}, \
-                     'wood': {'China': 5}}
-# Export price data for available trade routes
-AVAILABLE_EXPORTS = {'cigarette': {'India': 10}, \
-                     'chilli': {'America': 5}, \
-                     'cotton': {'China': 5}}
-# List of kingdoms importing from
-established_trade_routes = []
-# List of 3-tuples of kingdoms, type of goods importing and number
-import_goods = []
-# List of 3-tuples of kingdoms, type of goods exporting and number
-export_goods = []

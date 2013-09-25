@@ -1,5 +1,4 @@
 
-1. Modify/Add user_action methods
+1. Link everything up - Make every method relevant to game context
 2. Write test cases for every user_action
-3. Assign score points
 

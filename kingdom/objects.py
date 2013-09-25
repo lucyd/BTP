@@ -14,9 +14,9 @@ class farm:
   def __init__(self, _type=None):
     if _type == None or _type.strip() == '' \
 	      or _type not in VALID_FARM_TYPES:
-      self.farm_type = DEFAULT_FARM_TYPE
+      self._type = DEFAULT_FARM_TYPE
     else:
-      self.farm_type = _type
+      self._type = _type
     self.location = assign_random_location("farm")
     self.age = 0
   
@@ -25,22 +25,22 @@ class farm:
 
   def change_farm_type(self, _type):
     # Assuming _type is in VALID_FARM_TYPES
-    self.farm_type = _type
+    self._type = _type
 
   def get_location(self):
     return self.location
 
   def get_farm_type(self):
-    return self.farm_type
+    return self._type
 
 class industry:
   ''' The industrial unit class '''
   def __init__(self, _type=None):
     if _type == None or _type.strip() == '' \
 	      or _type not in VALID_INDUSTRY_TYPES:
-      self.industry_type = DEFAULT_INDUSTRY_TYPE
+      self._type = DEFAULT_INDUSTRY_TYPE
     else:
-      self.industry_type = _type
+      self._type = _type
     self.location = assign_random_location("industry")
     self.age = 0
     self.gross_product = 0
@@ -52,11 +52,11 @@ class industry:
     self.location = loc
 	
   def get_industry_type(self):
-    return self.industry_type
+    return self._type
 
   def change_industry_type(self, _type):
     # Assuming _type is in VALID_INDUSTRY_TYPES
-    self.industry_type = _type
+    self._type = _type
 
 class hospital:
   ''' The hospital unit class '''
@@ -123,7 +123,7 @@ class festival:
 class cultural_unit:
   ''' The cultural unit class '''
   def __init__(self):
-    self.cultural_unit_type = DEFAULT_CULTURAL_UNIT_TYPE
+    self._type = DEFAULT_CULTURAL_UNIT_TYPE
     self.location = assign_random_location("cultural_unit")
     self.age = 0
 
@@ -134,17 +134,17 @@ class cultural_unit:
     self.location = loc
 
   def get_cultural_unit_type(self):
-    return self.cultural_unit_type
+    return self._type
 
   def change_cultural_unit_type(self, _type):
     if _type in VALID_CULTURAL_UNIT_TYPES:
-      self.cultural_unit_type = _type
+      self._type = _type
 
 def house:
   ''' The house class '''
   def __init__(self, _type=None):
     if _type is None or type.strip() == '':
-      self.house_type = DEFAULT_HOUSE_TYPE
+      self._type = DEFAULT_HOUSE_TYPE
     self.location = assign_random_location("house")
     self.age = 0
 
@@ -155,9 +155,9 @@ def house:
     self.location = loc
 
   def get_house_type(self):
-    return self.house_type
+    return self._type
 
   def change_house_type(self, _type):
     if _type in VALID_HOUSE_TYPES:
-      self.house_type = _type
+      self._type = _type
 
