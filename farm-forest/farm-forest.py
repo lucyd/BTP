@@ -30,6 +30,8 @@ FARM_REQUIREMENTS = {
 	'CHILLI' : {'water':5 ,'temperature':4 ,'minerals':4}
 }
 
+LAND_RESOURCE_LIMITS = [15, 10, 5]
+
 FARM_RESOURCES = {
        'COTTON' : {'wood':2, 'cotton':10},
        'TOBACCO' : {'wood':3, 'tobacco':10},
@@ -47,12 +49,13 @@ DEFAULT_FOREST_RESOURCES = {
 }
 
 # General parameters and variables
+map_initialization_done = False
 initial_forest_input = None
 # Current time of the game
 time = 0
 # Dictionary of player's acquired resources
 # Union of FARM_RESOURCES and FOREST_RESOURCE_TYPES
-PLAYER_RESOURCES = {'water':0, 'wood':0, \
+PLAYER_RESOURCES = {'water':50, 'wood':0, \
                     'cotton':0, 'tobacco':0, \
                     'chilli':0}
 # _farm_units is a list of farm_unit objects
@@ -63,7 +66,8 @@ _forest_units = []
 user_actions = ['Pass', 'Create Farm', 'Destroy Farm', \
 	       'Harvest Farm', 'Destroy Forest', \
 	       'Harvest Forest', 'List Farms', \
-               'List Forests', 'List Resources']
+               'List Forests', 'List Resources', \
+               'Show Map Contents']
 # Index of the action selected by the player
 user_input = None
 
@@ -74,6 +78,10 @@ class unit_location:
   ''' A location of an unit'''
   def __init__(self, x=None, y=None):
     self.center = (x, y)
+    self.resources = assign_random_resources('land')
+
+  def set_resources(self, _resources):
+    self.resources = _resources
 
   def set_center(self, x, y):
     self.center = (x, y)
@@ -95,6 +103,9 @@ class farm_unit:
   def change_location(self, loc):
     self.location = loc
 
+  def get_location(self):
+    return self.location
+
   def change_type(self, _type):
     # _type is a valid farm unit type
     self.farm_type = _type
@@ -106,29 +117,17 @@ class forest_unit:
   ''' The forest unit class '''
   def __init__(self):
     self.location = assign_random_location("forest")
-    #self.resources = DEFAULT_FOREST_RESOURCES
-    self.resources = assign_random_resources()
+    self.location.set_resources(assign_random_resources("forest"))
     self.age = 0
 
-  def change_location(loc):
+  def change_location(self, loc):
     self.location = loc
 
-  def fill_resources(resources_dict):
-    self.resources = resources_dict
-
-
+  def get_location(self):
+    return self.location
 
 
 # Methods
-def assign_location(unit, loc):
-  ''' If loc available in the map, allocates the loc location
-	to unit. Else, raises LocationUnavailable exception'''
-  global map_contents
-  if loc in map_contents.keys():
-    raise LocationUnavailable
-  else:
-    map_contents[loc] = unit
-
 def assign_random_location(unit):
   ''' Selects a random location from the map and assigns it as the unit '''
   global FARM_UNIT_SIZE
@@ -144,35 +143,81 @@ def assign_random_location(unit):
   while True:
     x = random.randrange(0+size, map_size-size)
     y = random.randrange(0+size, map_size-size)
-    loc.set_center(x,y)
-    if loc not in map_contents.keys():
+    if check_map(x,y) is None:
       break
+  loc.set_center(x,y)
   map_contents[loc] = unit
   return loc
 
-def check_unit(loc):
-  ''' If loc is allocated in the map, returns the unit allocated to.
+def check_map(x, y):
+  ''' If (x,y) is allocated in the map, returns the unit allocated to.
       Else, returns None. '''
   global map_contents
-  if loc in map_contents.keys():
-    return map_contents[loc]
-  else:
-    return None
+  for loc in map_contents.keys():
+    if loc.center == (x,y):
+      return map_contents[loc]
+  return None
 
-def assign_random_resources():
+def farm_requirements_satisifed(x, y, farm_type):
+  ''' Returns 1 if location satisfied farm's requirements,
+      0 otherwise '''
+  global FARM_REQUIREMENTS
+  loc_resources = get_resources(x, y)
+  required_resources = FARM_REQUIREMENTS[farm_type]
+  for resource in required_resources:
+    if resource not in loc_resources.keys() or required_resources[resource] > loc_resources[resource]:
+      return 0
+  return 1
+
+def delete_location(x, y):
+  ''' Removes the location from map_contents '''
+  for loc in map_contents.keys():
+    if loc.center == (x,y):
+      map_contents.pop(loc, None)
+
+def assign_random_resources(_type):
   ''' Returns a resources dictionary with random values  '''
   global FOREST_RESOURCE_TYPES
   global FOREST_RESOURCE_LIMITS
+  global FARM_REQUIREMENTS
+  global LAND_RESOURCE_LIMITS
   resources = {}
-  for i in range(len(FOREST_RESOURCE_TYPES)):
-    x = random.randrange(0, FOREST_RESOURCE_LIMITS[i])
-    resources[FOREST_RESOURCE_TYPES[i]] = x
+  if _type == 'forest':
+    resource_types = FOREST_RESOURCE_TYPES
+    resource_limits = FOREST_RESOURCE_LIMITS
+  elif _type == 'land':
+    resource_types = FARM_REQUIREMENTS.keys()
+    resource_limits = LAND_RESOURCE_LIMITS
+  for i in range(len(resource_types)):
+    x = random.randrange(0, resource_limits[i])
+    resources[resource_types[i]] = x
   return resources
+
+def get_resources(x, y):
+  ''' Returns the resources dict of the location '''
+  global map_contents
+  for loc in map_contents.keys():
+    if loc.center == (x,y):
+      return loc.resources
+  return {}
 
 def increment_time():
   ''' Increments time by 1 '''
   global time
   time += 1
+
+def initialize_map():
+  ''' Initializes map with locations '''
+  global map_contents
+  global map_size
+  global map_initialization_done
+  for i in range(map_size):
+    for j in range(map_size):
+      if random.randrange(2) == 0:
+        loc = unit_location()
+        loc.set_center(i,j)
+        map_contents[loc] = 'land'
+  map_initialization_done = True
 
 def simulate_farm_growth():
   ''' Simulates the farm growth '''
@@ -206,7 +251,14 @@ def create_farm():
     print 'Enter farm-unit center co-ordinates: '
     x = input()
     y = input()
-    new_farm_unit.change_location(unit_location(x, y))
+    if check_map(x,y) is None and \
+      farm_requirements_satisfied(x,y,VALID_FARM_TYPES[farm_type]):
+        new_loc = unit_location(x,y)
+        new_farm_unit.change_location(new_loc)
+        map_contents[new_loc] = 'farm'
+    else:
+      print 'Oops!!! Location already assigned'
+      return
   _farm_units.append(new_farm_unit)
 
 def destroy_farm():
@@ -217,7 +269,9 @@ def destroy_farm():
   y = input()
   for i in range(len(_farm_units)):
     if _farm_units[i].location.center == (x,y):
+      delete_location(x,y)
       _farm_units = _farm_units[:i] + _farm_units[i+1:]
+      return
   print 'Farm-unit specified not found'
 
 def harvest_farm():
@@ -233,7 +287,9 @@ def harvest_farm():
       _farm_resources = FARM_RESOURCES[_farm_units[i].farm_type]
       for resource in _farm_resources.keys():
         PLAYER_RESOURCES[resource] += (_farm_units[i].age * _farm_resources[resource])
+      delete_location(x,y)
       _farm_units = _farm_units[:i] + _farm_units[i+1:]
+      return
   print 'Farm-unit specified not found'
 
 def destroy_forest():
@@ -244,6 +300,7 @@ def destroy_forest():
   y = input()
   for i in range(len(_forest_units)):
     if _forest_units[i].location.center == (x,y):
+      delete_location(x,y)
       _forest_units = _forest_units[:i] + _forest_units[i+1:]
       return
   print 'Forest-unit specified not found'
@@ -257,8 +314,9 @@ def harvest_forest():
   y = input()
   for i in range(len(_forest_units)):
     if _forest_units[i].location.center == (x,y):
-      for resource in _forest_units[i].resources.keys():
-        PLAYER_RESOURCES[resource] += (_forest_units[i].age * _forest_units[i].resources[resource])
+      for resource in _forest_units[i].location.resources.keys():
+        PLAYER_RESOURCES[resource] += (_forest_units[i].age * _forest_units[i].location.resources[resource])
+      delete_location(x,y)
       _forest_units = _forest_units[:i] + _forest_units[i+1:]
       return
   print 'Forest-unit specified not found'
@@ -283,13 +341,31 @@ def list_forests():
   for _forest_unit in _forest_units:
     print "Center:", _forest_unit.location.center, \
           "  Age:", _forest_unit.age, \
-          "  Resources:", _forest_unit.resources
+          "  Resources:", _forest_unit.location.resources
 
 def list_resources():
   ''' Lists the player's acquired resources '''
   global PLAYER_RESOURCES
   for resource in PLAYER_RESOURCES.keys():
     print resource, ": ", PLAYER_RESOURCES[resource]
+
+def show_map_contents():
+  ''' Displays the map contents '''
+  global map_size
+  for i in range(map_size):
+    for j in range(map_size):
+      print 'Co-ordinates: ', (i,j),
+      print 'Resources: ', get_resources(i,j)
+
+def game_over():
+  ''' Called when constraints for finishing of game are satisfied '''
+  print '\n----Game over----\n'
+  print 'Thank you for playing the game'
+  print 'Final statistics: '
+  list_farms()
+  list_forests()
+  list_resources()
+  sys.exit(1)
 
 def get_initial_forest_input():
   ''' Initializes the forests in the map '''
@@ -333,15 +409,21 @@ def process_user_input(user_input):
     list_forests()
   elif user_action == 'List Resources':
     list_resources()
+  elif user_action == 'Show Map Contents':
+    show_map_contents()
 
 
 
 # Infinite game loop
 while True:
+  if map_initialization_done == False :
+     initialize_map()
   if True :
      increment_time()
   if initial_forest_input == None :
      get_initial_forest_input()
+  if len(_forest_units) == 0 :
+     game_over()
   if True :
      simulate_farm_growth()
   if True :

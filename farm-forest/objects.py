@@ -2,6 +2,10 @@ class unit_location:
   ''' A location of an unit'''
   def __init__(self, x=None, y=None):
     self.center = (x, y)
+    self.resources = assign_random_resources('land')
+
+  def set_resources(self, _resources):
+    self.resources = _resources
 
   def set_center(self, x, y):
     self.center = (x, y)
@@ -23,6 +27,9 @@ class farm_unit:
   def change_location(self, loc):
     self.location = loc
 
+  def get_location(self):
+    return self.location
+
   def change_type(self, _type):
     # _type is a valid farm unit type
     self.farm_type = _type
@@ -34,14 +41,11 @@ class forest_unit:
   ''' The forest unit class '''
   def __init__(self):
     self.location = assign_random_location("forest")
-    #self.resources = DEFAULT_FOREST_RESOURCES
-    self.resources = assign_random_resources()
+    self.location.set_resources(assign_random_resources("forest"))
     self.age = 0
 
-  def change_location(loc):
+  def change_location(self, loc):
     self.location = loc
 
-  def fill_resources(resources_dict):
-    self.resources = resources_dict
-
-
+  def get_location(self):
+    return self.location

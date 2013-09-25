@@ -13,9 +13,9 @@ def assign_random_location(unit):
   while True:
     x = random.randrange(0+size, map_size-size)
     y = random.randrange(0+size, map_size-size)
-    loc.set_center(x,y)
-    if loc not in map_contents.keys():
+    if check_map(x,y) is None:
       break
+  loc.set_center(x,y)
   map_contents[loc] = unit
   return loc
 
@@ -28,26 +28,66 @@ def check_map(x, y):
       return map_contents[loc]
   return None
 
+def farm_requirements_satisifed(x, y, farm_type):
+  ''' Returns 1 if location satisfied farm's requirements,
+      0 otherwise '''
+  global FARM_REQUIREMENTS
+  loc_resources = get_resources(x, y)
+  required_resources = FARM_REQUIREMENTS[farm_type]
+  for resource in required_resources:
+    if resource not in loc_resources.keys() or required_resources[resource] > loc_resources[resource]:
+      return 0
+  return 1
+
 def delete_location(x, y):
   ''' Removes the location from map_contents '''
   for loc in map_contents.keys():
     if loc.center == (x,y):
       map_contents.pop(loc, None)
 
-def assign_random_resources():
+def assign_random_resources(_type):
   ''' Returns a resources dictionary with random values  '''
   global FOREST_RESOURCE_TYPES
   global FOREST_RESOURCE_LIMITS
+  global FARM_REQUIREMENTS
+  global LAND_RESOURCE_LIMITS
   resources = {}
-  for i in range(len(FOREST_RESOURCE_TYPES)):
-    x = random.randrange(0, FOREST_RESOURCE_LIMITS[i])
-    resources[FOREST_RESOURCE_TYPES[i]] = x
+  if _type == 'forest':
+    resource_types = FOREST_RESOURCE_TYPES
+    resource_limits = FOREST_RESOURCE_LIMITS
+  elif _type == 'land':
+    resource_types = FARM_REQUIREMENTS.keys()
+    resource_limits = LAND_RESOURCE_LIMITS
+  for i in range(len(resource_types)):
+    x = random.randrange(0, resource_limits[i])
+    resources[resource_types[i]] = x
   return resources
+
+def get_resources(x, y):
+  ''' Returns the resources dict of the location '''
+  global map_contents
+  for loc in map_contents.keys():
+    if loc.center == (x,y):
+      return loc.resources
+  return {}
 
 def increment_time():
   ''' Increments time by 1 '''
   global time
   time += 1
+
+def initialize_map():
+  ''' Initializes map with locations '''
+  global map_contents
+  global map_size
+  global map_initialization_done
+  for i in range(map_size):
+    for j in range(map_size):
+      if random.randrange(2) == 0:
+        loc = unit_location()
+        loc.set_center(i,j)
+        map_contents[loc] = 'land'
+  map_initialization_done = True
 
 def simulate_farm_growth():
   ''' Simulates the farm growth '''
@@ -81,10 +121,11 @@ def create_farm():
     print 'Enter farm-unit center co-ordinates: '
     x = input()
     y = input()
-    if check_map(x,y) is None:
-      new_loc = unit_location(x,y)
-      new_farm_unit.change_location(new_loc)
-      map_contents[loc] = 'farm'
+    if check_map(x,y) is None and \
+      farm_requirements_satisfied(x,y,VALID_FARM_TYPES[farm_type]):
+        new_loc = unit_location(x,y)
+        new_farm_unit.change_location(new_loc)
+        map_contents[new_loc] = 'farm'
     else:
       print 'Oops!!! Location already assigned'
       return
@@ -98,7 +139,7 @@ def destroy_farm():
   y = input()
   for i in range(len(_farm_units)):
     if _farm_units[i].location.center == (x,y):
-      map_contents.delete_location(x,y)
+      delete_location(x,y)
       _farm_units = _farm_units[:i] + _farm_units[i+1:]
       return
   print 'Farm-unit specified not found'
@@ -116,7 +157,7 @@ def harvest_farm():
       _farm_resources = FARM_RESOURCES[_farm_units[i].farm_type]
       for resource in _farm_resources.keys():
         PLAYER_RESOURCES[resource] += (_farm_units[i].age * _farm_resources[resource])
-      map_contents.delete_location(x,y)
+      delete_location(x,y)
       _farm_units = _farm_units[:i] + _farm_units[i+1:]
       return
   print 'Farm-unit specified not found'
@@ -129,7 +170,7 @@ def destroy_forest():
   y = input()
   for i in range(len(_forest_units)):
     if _forest_units[i].location.center == (x,y):
-      map_contents.delete_location(x,y)
+      delete_location(x,y)
       _forest_units = _forest_units[:i] + _forest_units[i+1:]
       return
   print 'Forest-unit specified not found'
@@ -143,9 +184,9 @@ def harvest_forest():
   y = input()
   for i in range(len(_forest_units)):
     if _forest_units[i].location.center == (x,y):
-      for resource in _forest_units[i].resources.keys():
-        PLAYER_RESOURCES[resource] += (_forest_units[i].age * _forest_units[i].resources[resource])
-      map_contents.delete_location(x,y)
+      for resource in _forest_units[i].location.resources.keys():
+        PLAYER_RESOURCES[resource] += (_forest_units[i].age * _forest_units[i].location.resources[resource])
+      delete_location(x,y)
       _forest_units = _forest_units[:i] + _forest_units[i+1:]
       return
   print 'Forest-unit specified not found'
@@ -170,13 +211,31 @@ def list_forests():
   for _forest_unit in _forest_units:
     print "Center:", _forest_unit.location.center, \
           "  Age:", _forest_unit.age, \
-          "  Resources:", _forest_unit.resources
+          "  Resources:", _forest_unit.location.resources
 
 def list_resources():
   ''' Lists the player's acquired resources '''
   global PLAYER_RESOURCES
   for resource in PLAYER_RESOURCES.keys():
     print resource, ": ", PLAYER_RESOURCES[resource]
+
+def show_map_contents():
+  ''' Displays the map contents '''
+  global map_size
+  for i in range(map_size):
+    for j in range(map_size):
+      print 'Co-ordinates: ', (i,j),
+      print 'Resources: ', get_resources(i,j)
+
+def game_over():
+  ''' Called when constraints for finishing of game are satisfied '''
+  print '\n----Game over----\n'
+  print 'Thank you for playing the game'
+  print 'Final statistics: '
+  list_farms()
+  list_forests()
+  list_resources()
+  sys.exit(1)
 
 def get_initial_forest_input():
   ''' Initializes the forests in the map '''
@@ -220,4 +279,6 @@ def process_user_input(user_input):
     list_forests()
   elif user_action == 'List Resources':
     list_resources()
+  elif user_action == 'Show Map Contents':
+    show_map_contents()
 

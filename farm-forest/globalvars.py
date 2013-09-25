@@ -27,6 +27,8 @@ FARM_REQUIREMENTS = {
 	'CHILLI' : {'water':5 ,'temperature':4 ,'minerals':4}
 }
 
+LAND_RESOURCE_LIMITS = [15, 10, 5]
+
 FARM_RESOURCES = {
        'COTTON' : {'wood':2, 'cotton':10},
        'TOBACCO' : {'wood':3, 'tobacco':10},
@@ -44,12 +46,13 @@ DEFAULT_FOREST_RESOURCES = {
 }
 
 # General parameters and variables
+map_initialization_done = False
 initial_forest_input = None
 # Current time of the game
 time = 0
 # Dictionary of player's acquired resources
 # Union of FARM_RESOURCES and FOREST_RESOURCE_TYPES
-PLAYER_RESOURCES = {'water':0, 'wood':0, \
+PLAYER_RESOURCES = {'water':50, 'wood':0, \
                     'cotton':0, 'tobacco':0, \
                     'chilli':0}
 # _farm_units is a list of farm_unit objects
@@ -60,7 +63,8 @@ _forest_units = []
 user_actions = ['Pass', 'Create Farm', 'Destroy Farm', \
 	       'Harvest Farm', 'Destroy Forest', \
 	       'Harvest Forest', 'List Farms', \
-               'List Forests', 'List Resources']
+               'List Forests', 'List Resources', \
+               'Show Map Contents']
 # Index of the action selected by the player
 user_input = None
 
