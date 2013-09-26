@@ -7,6 +7,7 @@ import sys
 
 # MAP DATA
 map_size = 100
+map_initialization_done = False
 # map_contents is a dict with locations as keys and 'farm' or 'forest' as values
 map_contents = {
                }
@@ -28,7 +29,7 @@ FARM_REQUIREMENTS = {
 }
 
 LAND_RESOURCE_LIMITS = [15, 10, 5]
-
+FARM_RESOURCE_TYPES = ['cotton', 'tobacco', 'chilli']
 FARM_RESOURCES = {
        'COTTON' : {'wood':2, 'cotton':10},
        'TOBACCO' : {'wood':3, 'tobacco':10},
@@ -46,10 +47,10 @@ DEFAULT_FOREST_RESOURCES = {
 }
 
 # General parameters and variables
-map_initialization_done = False
 initial_forest_input = None
 # Current time of the game
 time = 0
+score = 0
 # Dictionary of player's acquired resources
 # Union of FARM_RESOURCES and FOREST_RESOURCE_TYPES
 PLAYER_RESOURCES = {'water':50, 'wood':0, \

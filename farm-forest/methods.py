@@ -89,6 +89,21 @@ def initialize_map():
         map_contents[loc] = 'land'
   map_initialization_done = True
 
+def update_score():
+  ''' Updates the score '''
+  global score
+  global time
+  global PLAYER_RESOURCES
+  global _forest_units
+  global _farm_units
+  global FOREST_RESOURCE_TYPES
+  global FARM_RESOURCE_TYPES
+  score = len(_forest_units) + len(_farm_units)
+  for resource in FOREST_RESOURCE_TYPES + FARM_RESOURCE_TYPES:
+    score += PLAYER_RESOURCES[resource]
+  score -= time
+  score -= 49
+
 def simulate_farm_growth():
   ''' Simulates the farm growth '''
   global _farm_units
@@ -229,12 +244,10 @@ def show_map_contents():
 
 def game_over():
   ''' Called when constraints for finishing of game are satisfied '''
+  global score
   print '\n----Game over----\n'
   print 'Thank you for playing the game'
-  print 'Final statistics: '
-  list_farms()
-  list_forests()
-  list_resources()
+  print 'Your final score: ', score, '\n'
   sys.exit(1)
 
 def get_initial_forest_input():

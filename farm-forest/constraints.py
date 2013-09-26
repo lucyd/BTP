@@ -1,6 +1,7 @@
 map_initialization_done == False ==> initialize_map()
 True ==> increment_time()
 initial_forest_input == None ==> get_initial_forest_input()
+True ==> update_score()
 len(_forest_units) == 0 ==> game_over()
 True ==> simulate_farm_growth()
 True ==> simulate_forest_growth()

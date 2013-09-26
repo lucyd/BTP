@@ -10,6 +10,7 @@ import sys
 
 # MAP DATA
 map_size = 100
+map_initialization_done = False
 # map_contents is a dict with locations as keys and 'farm' or 'forest' as values
 map_contents = {
                }
@@ -31,7 +32,7 @@ FARM_REQUIREMENTS = {
 }
 
 LAND_RESOURCE_LIMITS = [15, 10, 5]
-
+FARM_RESOURCE_TYPES = ['cotton', 'tobacco', 'chilli']
 FARM_RESOURCES = {
        'COTTON' : {'wood':2, 'cotton':10},
        'TOBACCO' : {'wood':3, 'tobacco':10},
@@ -49,10 +50,10 @@ DEFAULT_FOREST_RESOURCES = {
 }
 
 # General parameters and variables
-map_initialization_done = False
 initial_forest_input = None
 # Current time of the game
 time = 0
+score = 0
 # Dictionary of player's acquired resources
 # Union of FARM_RESOURCES and FOREST_RESOURCE_TYPES
 PLAYER_RESOURCES = {'water':50, 'wood':0, \
@@ -219,6 +220,21 @@ def initialize_map():
         map_contents[loc] = 'land'
   map_initialization_done = True
 
+def update_score():
+  ''' Updates the score '''
+  global score
+  global time
+  global PLAYER_RESOURCES
+  global _forest_units
+  global _farm_units
+  global FOREST_RESOURCE_TYPES
+  global FARM_RESOURCE_TYPES
+  score = len(_forest_units) + len(_farm_units)
+  for resource in FOREST_RESOURCE_TYPES + FARM_RESOURCE_TYPES:
+    score += PLAYER_RESOURCES[resource]
+  score -= time
+  score -= 49
+
 def simulate_farm_growth():
   ''' Simulates the farm growth '''
   global _farm_units
@@ -359,12 +375,10 @@ def show_map_contents():
 
 def game_over():
   ''' Called when constraints for finishing of game are satisfied '''
+  global score
   print '\n----Game over----\n'
   print 'Thank you for playing the game'
-  print 'Final statistics: '
-  list_farms()
-  list_forests()
-  list_resources()
+  print 'Your final score: ', score, '\n'
   sys.exit(1)
 
 def get_initial_forest_input():
@@ -422,6 +436,8 @@ while True:
      increment_time()
   if initial_forest_input == None :
      get_initial_forest_input()
+  if True :
+     update_score()
   if len(_forest_units) == 0 :
      game_over()
   if True :
