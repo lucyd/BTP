@@ -66,6 +66,10 @@ user_actions = ['Pass', 'Create Farm', 'Destroy Farm', \
 	       'Harvest Forest', 'List Farms', \
                'List Forests', 'List Resources', \
                'Show Map Contents']
-# Index of the action selected by the player
-user_input = None
+
+# LEARNING DATA
+# training_data is a list of training data samples(list of values in numbers)
+# It can be considered as a matrix with last column being decision-indexes
+training_data = []
+
 

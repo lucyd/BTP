@@ -69,8 +69,12 @@ user_actions = ['Pass', 'Create Farm', 'Destroy Farm', \
 	       'Harvest Forest', 'List Farms', \
                'List Forests', 'List Resources', \
                'Show Map Contents']
-# Index of the action selected by the player
-user_input = None
+
+# LEARNING DATA
+# training_data is a list of training data samples(list of values in numbers)
+# It can be considered as a matrix with last column being decision-indexes
+training_data = []
+
 
 
 
@@ -409,14 +413,19 @@ def process_user_input(user_input):
     return
   elif user_action == 'Create Farm':
     create_farm()
+    update_training_data(user_input)
   elif user_action == 'Destroy Farm':
     destroy_farm()
+    update_training_data(user_input)
   elif user_action == 'Harvest Farm':
     harvest_farm()
+    update_training_data(user_input)
   elif user_action == 'Destroy Forest':
     destroy_forest()
+    update_training_data(user_input)
   elif user_action == 'Harvest Forest':
     harvest_forest()
+    update_training_data(user_input)
   elif user_action == 'List Farms':
     list_farms()
   elif user_action == 'List Forests':
@@ -425,6 +434,116 @@ def process_user_input(user_input):
     list_resources()
   elif user_action == 'Show Map Contents':
     show_map_contents()
+
+def update_training_data(last_action):
+  ''' Updates the training data with the current parameters
+      Argument passed is the latest action taken by the user '''
+  global training_data
+  global _farm_units
+  global _forest_units
+  global PLAYER_RESOURCES
+  training_sample = []
+  training_sample.append(len(_farm_units))
+  training_sample.append(len(_forest_units))
+  for _resource in PLAYER_RESOURCES.values():
+    training_sample.append(_resource)
+  training_sample.append(last_action)
+  training_data.append(training_sample)
+
+def zero_index():
+  ''' Trigger event for decision of index 0 '''
+  return
+
+def one_index():
+  ''' Trigger event for decision of index 1 
+      Decrease resource-limit of a random farm type '''
+  global FARM_RESOURCES
+  farm_resources_keys = FARM_RESOURCES.keys()
+  farm_type = random.randrange(0, farm_resources_keys)
+  for _resource in FARM_RESOURCE[farm_type].keys():	
+    FARM_RESOURCE[farm_type][_resource] -= 0.5
+
+def two_index():
+  ''' Trigger event for decision of index 2 
+      Increase resource-limit of a random farm type '''
+  global FARM_RESOURCES
+  farm_resources_keys = FARM_RESOURCES.keys()
+  farm_type = random.randrange(0, farm_resources_keys)
+  for _resource in FARM_RESOURCE[farm_type].keys():	
+    FARM_RESOURCE[farm_type][_resource] += 0.5
+  	
+def three_index():
+  ''' Trigger event for decision of index 3 
+      Decrease farm growth rate '''
+  global FARM_GROWTH_RATE
+  farm_type = random.randrange(0, len(FARM_GROWTH_RATE))
+  FARM_GROWTH_RATE[FARM_GROWTH_RATE.keys()[farm_type]] -= 0.5
+
+def four_index():
+  ''' Trigger event for decision of index 4 
+      Increase farm growth rate '''
+  global FARM_GROWTH_RATE
+  farm_type = random.randrange(0, len(FARM_GROWTH_RATE))
+  FARM_GROWTH_RATE[FARM_GROWTH_RATE.keys()[farm_type]] += 0.5
+
+def five_index():
+  ''' Trigger event for decision of index 5 
+      Delete random forest unit '''
+  global _forest_units
+  random_forest_unit = random.randrange(0, len(_forest_units))
+  _forest_unit = _forest_units[random_forest_unit]
+  x = _forest_unit.location.center[0]
+  y = _forest_unit.location.center[1]
+  delete_location(x,y)
+  _forest_units = _forest_units[:random_forest_unit] + _farm_units[random_forest_unit+1:]
+
+def get_prediction():
+  ''' Forms the hyperplane by performing a multivariate logistic regressionover the training data collected from the training data '''
+  global training_data
+  if len(training_data) in [0,1]:
+    return 0
+  current_params = training_data[-1]
+  training_data = training_data[:-1]
+  # Multivariate logistic regression using gradient descent
+  alpha = 1
+  theta = [0] * (len(training_data[0])-1)
+  _iterations = 10
+  for i in range(_iterations):
+    for j in range(0, len(theta)):
+      zero_index_cost_diff = 0
+      cost_diff = 0
+      for _sample in training_data:
+        h = sum([theta[x]*_sample[x] for x in range(len(theta))])
+        zero_index_cost_diff += (h - _sample[-1])
+        cost_diff += ((h - _sample[-1]) * _sample[j])
+      cost_diff = (cost_diff*alpha) / len(training_data)
+      zero_index_cost_diff = (zero_index_cost_diff*alpha) / len(training_data)
+      if j == 0:
+        theta[j] = theta[j] - (alpha*zero_index_cost_diff)
+      else:
+        theta[j] = theta[j] - (alpha*cost_diff)
+  prediction = sum([theta[x]*current_params[x] for x in range(len(theta))])
+  training_data = []
+  if x>5 or x<0:
+    x=5
+  return x
+
+def update_learning():
+  ''' Triggers a game-event based on the user-decision prediction '''
+  prediction = get_prediction()
+  if prediction == 0:
+    zero_index()
+  elif prediction == 1:
+    one_index()
+  elif prediction == 2:
+    two_index()
+  elif prediction == 3:
+    three_index()
+  elif prediction == 4:
+    four_index()
+  elif prediction == 5:
+    five_index()
+
 
 
 
@@ -444,5 +563,7 @@ while True:
      simulate_farm_growth()
   if True :
      simulate_forest_growth()
+  if time%10 == 0 :
+     update_learning()	
   if True :
      process_user_input(get_user_input())
